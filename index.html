@@ -115,6 +115,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .debt-badge{font-size:10px;background:var(--r-bg);color:var(--r-txt);border:1px solid var(--r-brd);padding:2px 6px;border-radius:20px;margin-left:4px;white-space:nowrap;}
 .months-badge{font-size:10px;background:var(--b-bg);color:var(--b-txt);border:1px solid var(--b-brd);padding:2px 6px;border-radius:20px;white-space:nowrap;}
 .history{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--brd);}
+.result-screen{border:2px solid var(--brd);}
+.result-screen--good{background:var(--g-bg);border-color:var(--g-brd);}
+.result-screen--bad{background:var(--r-bg);border-color:var(--r-brd);}
+.result-screen--warn{background:var(--w-bg);border-color:var(--w-brd);}
+.result-screen--good .rh{color:var(--g-txt);}
+.result-screen--bad .rh{color:var(--r-txt);}
+.result-screen--warn .rh{color:var(--w-txt);}
 .history-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px;}
 .h-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px;color:var(--txt2);}
 .h-item:last-child{border-bottom:none;}
@@ -1892,18 +1899,48 @@ function _executeChoice(stageId, idx) {
     ${rLesson ? `<div class="rl">📚 ${rLesson}</div>` : ''}`;
 
   _nextStageId = rNext;
-  const btn = document.getElementById('btn-next');
-  btn.className = 'btn-next show';
-  btn.textContent = r.next === 'final' || r.next === 'final_bad' ? 'Посмотреть итоги →'
-    : r.next === 'restart' ? 'Играть заново' : 'Далее →';
+  const isMobile = window.innerWidth <= 540;
 
-  // Обновить шапку надёжно
-  const root = document.getElementById('root');
-  if(root) {
-    const hdr = root.querySelector('.header');
-    if(hdr) {
-      hdr.insertAdjacentHTML('afterend', renderHeader());
-      hdr.remove();
+  if(isMobile) {
+    // Мобильный: показываем результат как отдельный экран
+    const btnLabel = (rNext === 'final' || rNext === 'final_bad') ? 'Посмотреть итоги →'
+      : rNext === 'restart' ? 'Играть заново' : 'Далее →';
+    const root = document.getElementById('root');
+    root.innerHTML = `
+      ${renderHeader()}
+      <div class="card result-screen result-screen--${effectiveType}">
+        <div class="ri" style="font-size:26px;margin-bottom:6px;">${r.icon}</div>
+        <div class="rh" style="font-size:16px;margin-bottom:8px;">${rHead}</div>
+        <div class="rt" style="font-size:14px;line-height:1.75;">${rText}</div>
+        ${dl ? `<div class="deltas" style="margin-top:10px;">${dl}</div>` : ''}
+        ${debtWarning}
+        ${rLesson ? `<div class="rl" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.1);font-size:12px;color:var(--txt3);font-style:italic;line-height:1.6;">📚 ${rLesson}</div>` : ''}
+      </div>
+      <button class="btn-next show" onclick="goNext()">${btnLabel}</button>
+      <button class="btn-back" onclick="goBack()">← Вернуться и выбрать иначе</button>`;
+    window.scrollTo(0, 0);
+  } else {
+    // Десктоп: показываем результат под выборами как раньше
+    const res = document.getElementById('res');
+    res.className = 'result ' + effectiveType + ' show';
+    res.innerHTML = `
+      <div class="ri">${r.icon}</div>
+      <div class="rh">${rHead}</div>
+      <div class="rt">${rText}</div>
+      ${dl ? `<div class="deltas">${dl}</div>` : ''}
+      ${debtWarning}
+      ${rLesson ? `<div class="rl">📚 ${rLesson}</div>` : ''}`;
+
+    const btn = document.getElementById('btn-next');
+    btn.className = 'btn-next show';
+    btn.textContent = (rNext === 'final' || rNext === 'final_bad') ? 'Посмотреть итоги →'
+      : rNext === 'restart' ? 'Играть заново' : 'Далее →';
+
+    // Обновить шапку
+    const root = document.getElementById('root');
+    if(root) {
+      const hdr = root.querySelector('.header');
+      if(hdr) { hdr.insertAdjacentHTML('afterend', renderHeader()); hdr.remove(); }
     }
   }
 }
