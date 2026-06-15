@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Путь технолидера</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f0ede6;--bg2:#fff;--bg3:#fafaf8;--txt:#1a1a1a;--txt2:#555;--txt3:#888;
+  --brd:#e5e3dc;--brd2:#ccc;
+  --g-bg:#f0fdf4;--g-brd:#86efac;--g-txt:#15803d;
+  --r-bg:#fef2f2;--r-brd:#fca5a5;--r-txt:#b91c1c;
+  --w-bg:#fffbeb;--w-brd:#fcd34d;--w-txt:#b45309;
+  --b-bg:#eff6ff;--b-brd:#93c5fd;--b-txt:#1d4ed8;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+#app{max-width:580px;margin:0 auto;padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 60px);}
+@media(min-width:600px){#app{padding:20px 16px 60px;}}
+.header{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--brd);}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:6px;flex-wrap:wrap;}
+.co-name{font-size:13px;font-weight:600;flex:1;min-width:0;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.kpi{text-align:center;}
+.kpi-val{font-size:13px;font-weight:600;}
+@media(min-width:400px){.kpi-val{font-size:15px;}}
+.kpi-val.up{color:var(--g-txt);}
+.kpi-val.dn{color:var(--r-txt);}
+.kpi-lbl{font-size:9px;color:var(--txt3);margin-top:1px;}
+.path-wrap{background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--brd);}
+.path-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:6px;}
+.path-bar{display:flex;align-items:center;}
+.ps{display:flex;flex-direction:column;align-items:center;flex:1;}
+.pd{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid var(--brd2);background:var(--bg3);color:var(--txt3);flex-shrink:0;}
+.pd.done{background:var(--g-txt);border-color:var(--g-txt);color:#fff;}
+.pd.active{background:var(--txt);border-color:var(--txt);color:#fff;}
+.pd.bad{background:var(--r-txt);border-color:var(--r-txt);color:#fff;}
+.pl{font-size:8px;color:var(--txt3);margin-top:2px;text-align:center;max-width:44px;line-height:1.3;}
+.pl.active{color:var(--txt);font-weight:600;}
+.pline{flex:1;height:2px;background:var(--brd);max-width:14px;}
+.pline.done{background:var(--g-txt);}
+.card{background:var(--bg2);border-radius:12px;padding:14px 14px;margin-bottom:10px;border:1px solid var(--brd);}
+@media(min-width:500px){.card{padding:18px 20px;}}
+.card-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:5px;}
+.card-title{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:8px;}
+@media(min-width:500px){.card-title{font-size:17px;}}
+.card-body{font-size:13px;color:var(--txt2);line-height:1.7;}
+.card-body b{color:var(--txt);}
+.info-box{background:var(--b-bg);border:1px solid var(--b-brd);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--b-txt);line-height:1.65;margin-top:8px;}
+.warn-strip{background:var(--w-bg);border:1px solid var(--w-brd);border-radius:10px;padding:9px 12px;font-size:12px;color:var(--w-txt);line-height:1.65;margin-top:8px;}
+.collapsible-text.collapsed{max-height:72px;overflow:hidden;-webkit-mask-image:linear-gradient(black 40%,transparent);mask-image:linear-gradient(black 40%,transparent);}
+.show-more-btn{background:none;border:none;color:var(--b-txt);font-size:12px;font-weight:600;cursor:pointer;padding:4px 0;margin-top:4px;font-family:inherit;display:block;}
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.choice{background:var(--bg2);border:1.5px solid var(--brd);border-radius:12px;padding:12px 13px;cursor:pointer;text-align:left;font-family:inherit;font-size:13px;color:var(--txt);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .1s;}
+@media(min-width:500px){.choice{padding:13px 15px;font-size:14px;}}
+.choice:active:not(:disabled){background:var(--bg3);}
+@media(hover:hover){.choice:hover:not(:disabled){border-color:var(--brd2);background:var(--bg3);}}
+.choice:disabled{opacity:.35;cursor:not-allowed;}
+.cn{font-weight:600;margin-bottom:3px;line-height:1.4;}
+.cm{font-size:11px;color:var(--txt3);line-height:1.5;}
+.choice.sg{border-color:var(--g-brd);background:var(--g-bg);}
+.choice.sw{border-color:var(--w-brd);background:var(--w-bg);}
+.choice.sb{border-color:var(--r-brd);background:var(--r-bg);}
+.result{border-radius:12px;padding:13px 14px;margin-bottom:10px;display:none;}
+.result.show{display:block;}
+.result.good{background:var(--g-bg);border:1.5px solid var(--g-brd);}
+.result.bad{background:var(--r-bg);border:1.5px solid var(--r-brd);}
+.result.warn{background:var(--w-bg);border:1.5px solid var(--w-brd);}
+.ri{font-size:20px;margin-bottom:4px;}
+.rh{font-size:14px;font-weight:700;margin-bottom:4px;}
+.result.good .rh{color:var(--g-txt);}
+.result.bad .rh{color:var(--r-txt);}
+.result.warn .rh{color:var(--w-txt);}
+.rt{font-size:13px;color:var(--txt2);line-height:1.65;}
+.deltas{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
+.delta{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.dp{background:#dcfce7;color:var(--g-txt);}
+.dn{background:#fee2e2;color:var(--r-txt);}
+.dw{background:#fef3c7;color:var(--w-txt);}
+.rl{font-size:12px;color:var(--txt3);margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.07);font-style:italic;line-height:1.6;}
+.btn-next{width:100%;padding:15px;background:var(--txt);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:none;margin-bottom:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.btn-next.show{display:block;}
+.btn-next:active{opacity:.85;}
+.btn-big{width:100%;padding:15px;background:var(--txt);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.btn-big:active{opacity:.85;}
+.btn-back{width:100%;padding:12px;background:transparent;color:var(--txt3);border:1px solid var(--brd);border-radius:12px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:10px;-webkit-tap-highlight-color:transparent;}
+.btn-back:active{background:var(--bg3);}
+.m-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0;}
+.mrow{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:10px 12px;}
+.ml{font-size:10px;color:var(--txt3);margin-bottom:2px;}
+.mv{font-size:14px;font-weight:600;}
+.final-card{background:var(--bg2);border-radius:12px;padding:18px 14px;text-align:center;border:1px solid var(--brd);margin-bottom:10px;}
+@media(min-width:500px){.final-card{padding:26px 22px;}}
+.fscore{font-size:42px;font-weight:700;margin:6px 0;}
+.frating{font-size:17px;font-weight:700;margin-bottom:6px;}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0;}
+.fkpi{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:10px;}
+.fv{font-size:17px;font-weight:700;}
+.fl{font-size:10px;color:var(--txt3);margin-top:2px;}
+#funds-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:1000;align-items:flex-end;justify-content:center;}
+@media(min-width:500px){#funds-modal{align-items:center;}}
+#funds-modal[style*="block"]{display:flex!important;}
+.funds-modal-inner{background:var(--bg2);border-radius:20px 20px 0 0;padding:22px 18px calc(env(safe-area-inset-bottom,16px) + 8px);width:100%;max-width:480px;}
+@media(min-width:500px){.funds-modal-inner{border-radius:16px;padding:24px 22px;width:90%;}}
+.fm-icon{font-size:30px;margin-bottom:6px;text-align:center;}
+.fm-title{font-size:17px;font-weight:700;margin-bottom:5px;color:var(--r-txt);text-align:center;}
+.fm-text{font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6;text-align:center;}
+.fm-choices{display:flex;flex-direction:column;gap:8px;}
+.fm-btn{width:100%;padding:13px 14px;border:1.5px solid var(--brd2);border-radius:11px;background:var(--bg3);color:var(--txt);font-family:inherit;font-size:13px;cursor:pointer;text-align:left;line-height:1.5;-webkit-tap-highlight-color:transparent;}
+.fm-btn:active{background:var(--bg2);}
+.fm-btn small{font-size:11px;color:var(--txt3);display:block;}
+.fm-btn.warn{border-color:var(--r-brd);}
+.fm-btn.cancel{background:transparent;border-color:var(--brd);color:var(--txt3);text-align:center;}
+.fm-disabled{padding:10px 14px;border-radius:11px;background:var(--bg3);font-size:13px;color:var(--txt3);border:1.5px solid var(--brd);opacity:.5;}
+.debt-badge{font-size:10px;background:var(--r-bg);color:var(--r-txt);border:1px solid var(--r-brd);padding:2px 6px;border-radius:20px;margin-left:4px;white-space:nowrap;}
+.months-badge{font-size:10px;background:var(--b-bg);color:var(--b-txt);border:1px solid var(--b-brd);padding:2px 6px;border-radius:20px;white-space:nowrap;}
+.history{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--brd);}
+.history-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px;}
+.h-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px;color:var(--txt2);}
+.h-item:last-child{border-bottom:none;}
+.h-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.h-dot.g{background:var(--g-txt);}
+.h-dot.b{background:var(--r-txt);}
+.h-dot.w{background:var(--w-txt);}
+</style>
+</head>
+<body>
+<div id="app"><div id="root"></div><div id="funds-modal"></div><div id="profit-note" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999;white-space:nowrap;"></div></div>
+<script>
+// ══ НАЧАЛЬНЫЕ ДАННЫЕ ══
+const INIT_STATE = {
+  cash:500, sales:15, price:60, profitPct:0.18, costPct:0.35, opexPct:0.47,
+  reputation:100, score:0, goodChoices:0,
+  baseSales:15,
+  patentType:'invention',
+  patentReceived: false,
+  opexFixed:580,
+  debt:0,           // накопленный долг по кредитам
+  debtMonthly:0,    // ежемесячный платёж по кредиту
+  totalMonths:0,    // сколько месяцев прошло в игре
+  staff:4,          // количество сотрудников
+};
+
+// ══ ИСТОРИЯ ДЛЯ КНОПКИ НАЗАД ══
+let history = []; // [{stageId, state}]
+let st = {...INIT_STATE};
+let answered = false;
+
+// ── Начислить прибыль за N месяцев ──
+// Вызывается при переходе между этапами
+function accrueProfit(months) {
+  if(!months || months <= 0) return 0;
+  const rev = st.sales * st.price;
+  const cogs = Math.round(rev * st.costPct);
+  const opex = st.opexFixed || 580;
+  const profitPerMonth = Math.round(rev - cogs - opex);
+  const total = profitPerMonth * months;
+  const debtPayments = Math.round((st.debtMonthly || 0) * months);
+  let net = total - debtPayments;
+
+  // Защита: если прибыль отрицательная — не даём потерять больше 40% кэша за один переход
+  if(net < 0 && st.cash > 0) {
+    const maxLoss = Math.round(st.cash * 0.4);
+    net = Math.max(net, -maxLoss);
+  }
+
+  st.cash += net;
+  st.totalMonths += months;
+
+  // Конкурент уводит клиентов пока нет патента
+  if(!st.patentReceived && st.sales > 3) {
+    const lost = Math.floor(months / 2);
+    if(lost > 0) {
+      st.sales = Math.max(3, st.sales - lost);
+      st._competitorLoss = (st._competitorLoss || 0) + lost;
+    }
+  }
+
+  // Репутация влияет на продажи: < 70 → теряем клиентов
+  if(st.reputation < 70 && st.sales > 3) {
+    const repLost = Math.floor((70 - st.reputation) / 20) * Math.ceil(months / 2);
+    if(repLost > 0) {
+      st.sales = Math.max(3, st.sales - repLost);
+      st._repLoss = (st._repLoss || 0) + repLost;
+    }
+  }
+
+  return net;
+}
+
+// Расчёт прибыли для показа игроку
+function monthlyProfit() {
+  const f = calcFin(st);
+  return f.profit;
+}
+
+// ── Проверить достаточность денег, предложить кредит если нет ──
+// Возвращает true если можно продолжить, false если нет
+// При нехватке — показывает модальный выбор
+let _pendingCost = 0;
+let _pendingCallback = null;
+
+function checkFunds(cost, callback) {
+  if(st.cash >= cost) {
+    callback();
+    return;
+  }
+  // Недостаточно денег — показываем выбор
+  _pendingCost = cost;
+  _pendingCallback = callback;
+  showFundsModal(cost);
+}
+
+function showFundsModal(cost) {
+  const shortage = cost - st.cash;
+  const canCredit = st.debt < 900;
+  const canKubi = !st._kubushkaUsed;
+  const canFire = st.staff > 1;
+  const monthProfit = monthlyProfit();
+
+  const el = document.getElementById('funds-modal');
+  if(!el) return;
+
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="funds-modal-inner">
+      <div class="fm-icon">💸</div>
+      <div class="fm-title">Не хватает ${shortage} тыс ₽</div>
+      <div class="fm-text">На счету ${st.cash} тыс ₽, нужно ${cost} тыс ₽.<br>
+        <span style="font-size:11px;opacity:.75">Прибыль компании: ~${monthProfit} тыс ₽/мес — деньги накапливаются по ходу игры.</span>
+      </div>
+      <div class="fm-choices">
+        ${canCredit ? `<button class="fm-btn" onclick="takeLoan(${cost})">🏦 Взять кредит 600 тыс ₽<br><small>Долг: +690 тыс ₽ в конце игры</small></button>` : '<div class="fm-disabled">🏦 Кредит недоступен — превышен лимит долга</div>'}
+        ${canKubi ? `<button class="fm-btn" onclick="useKubushka(${cost})">🏺 Личная кубышка руководителя<br><small>+400 тыс ₽ из личных средств (разово)</small></button>` : '<div class="fm-disabled">🏺 Кубышка уже использована</div>'}
+        ${canFire ? `<button class="fm-btn warn" onclick="fireSomeone(${cost})">👋 Уволить сотрудника<br><small>−140 тыс ₽/мес расходов, но продажи −2/мес</small></button>` : ''}
+        <button class="fm-btn cancel" onclick="closeFundsModal()">↩ Вернуться назад</button>
+      </div>
+    </div>`;
+}
+
+function updateHeaderNow() {
+  const root = document.getElementById('root');
+  if(!root) return;
+  const hdr = root.querySelector('.header');
+  if(hdr) { hdr.insertAdjacentHTML('afterend', renderHeader()); hdr.remove(); }
+}
+
+function takeLoan(cost) {
+  st.cash += 600;
+  st.debt += 690;
+  addFundsLog('Взяли кредит 600 тыс ₽. Долг в конце игры: +690 тыс ₽');
+  updateHeaderNow();
+  closeFundsModal();
+  if(st.cash >= cost && _pendingCallback) { const cb = _pendingCallback; _pendingCallback = null; cb(); }
+  else if(st.cash < cost) showFundsModal(cost);
+}
+
+function useKubushka(cost) {
+  if(st._kubushkaUsed) return;
+  st.cash += 400;
+  st._kubushkaUsed = true;
+  addFundsLog('Личная кубышка: +400 тыс ₽ (разово)');
+  updateHeaderNow();
+  closeFundsModal();
+  if(st.cash >= cost && _pendingCallback) { const cb = _pendingCallback; _pendingCallback = null; cb(); }
+  else if(st.cash < cost) showFundsModal(cost);
+}
+
+function fireSomeone(cost) {
+  st.opexFixed = Math.max(0, st.opexFixed - 140);
+  st.sales = Math.max(1, st.sales - 2);
+  st.staff = Math.max(1, st.staff - 1);
+  addFundsLog(`Уволили сотрудника: расходы −140 тыс/мес, продажи −2/мес. Осталось сотрудников: ${st.staff}`);
+  updateHeaderNow();
+  closeFundsModal();
+  if(st.cash >= cost && _pendingCallback) { const cb = _pendingCallback; _pendingCallback = null; cb(); }
+  else if(_pendingCost > 0) showFundsModal(_pendingCost);
+}
+
+function closeFundsModal() {
+  const el = document.getElementById('funds-modal');
+  if(el) el.style.display = 'none';
+  _pendingCost = 0;
+  _pendingCallback = null;
+}
+
+let _fundsLog = [];
+function addFundsLog(msg) { _fundsLog.push(msg); }
+
+// ── ТАБЛИЦА МЕСЯЦЕВ ПО ЭТАПАМ ──
+const STAGE_MONTHS = {
+  1: 0, '2_letter': 1, '2_price': 1,
+  '3_back_to_competitor': 1, '3_back_to_competitor_2': 2, '3_ad_budget': 1, '3_must_patent': 0,
+  '3_ad_bigclient': 1, '3_competitor_copied': 3, '3_ad_overload': 0, '3_ad_penalty': 1, '3_ad_hire': 0,
+  4: 1, '3_equipment': 0, '3_secret_warning': 0, '3_ad_overload': 0, '4_brief': 0, '4_no_guarantee': 1, '4_bureau_choice': 0,
+  '4_delayed': 3, '4_redo': 2, '4_restart_after_rejection': 1,
+  // Патентование — основные задержки
+  5: 6,   // ИИП: 6 мес
+  // Патентомания и другие — через effect напрямую
+  '5_utility_model_warning': 0, '5_after_repatent': 0, '5_lawsuit_narrow_result': 0, '5_nda_consequence': 0, '5_lawsuit_utility': 3, '5_lawsuit_narrow': 3,
+  '5_clients_from_competitor': 1,
+  '5_tm': 0, '5_tm_bad': 4, '5_journal': 1,
+  '5_secret': 0, '5_secret_bad': 2,
+  6: 3, 7: 4, '7': 4,
+  'final_bad': 0,
+};
+
+// ══ ЭТАПЫ ══
+// next: число = id следующего этапа
+// Ключевые ID:
+// 'start' = стартовый экран
+// 1 = первый выбор (письмо/цена/юрист)
+// 2a,2b,2c = ветки после письма (отзывы)
+// 3_回 = возврат к проблеме после ветки письма (конкурент продолжает!)
+// 3a,3b,3c = ветки после цены
+// 3_price_back = возврат к проблеме после ценовой ветки
+// 4 = патентование
+// 5 = патент получен
+// 6 = масштабирование
+// 7 = финальный выбор
+// 'final' = финал
+
+const STAGES = {
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 1: Первый выбор
+  // ────────────────────────────────────────────────
+  1: {
+    pathPos: 1,
+    tag: 'Угроза',
+    title: 'Конкурент выпустил похожий товар',
+    body: 'Конкурент начал производить продукт, очень похожий на ваш. Клиенты уже спрашивают: «А чем вы лучше?» Продажи пока не упали, но тревога нарастает.',
+    info: null,
+    choices: [
+      {
+        name: '✉️ Напишу гневное письмо с требованием прекратить',
+        meta: 'Бесплатно · быстро',
+        type: 'bad',
+        effect: s => ({ reputation: s.reputation - 10 }),
+        result: {
+          icon:'😬', head:'Конкурент промолчал',
+          text:'Письмо отправлено, но конкурент его проигнорировал. Хуже того — он рассказал об этом в отраслевом чате. Начинают появляться негативные отзывы о вашей компании.',
+          deltas:[{t:'Репутация −10',c:'dn'}],
+          lesson:'Юридически незаверенные требования не имеют силы. Без патента угрожать нечем.',
+          next:'2_letter'
+        }
+      },
+      {
+        name: '💸 Снижу цену и переманю его клиентов',
+        meta: 'Цена −9%',
+        type: 'warn',
+        effect: s => ({ price: Math.round(s.price*0.91), sales: Math.round(s.sales*1.05) }),
+        result: {
+          icon:'📉', head:'Прибыль почти не изменилась — проблема не решена',
+          text:'Вы снизили цену на 9%. Пришло чуть больше клиентов (+5%), но конкурент тоже снизил цену следом. Выручка чуть выросла, но прибыль почти не изменилась — скидка съела разницу. А главное: конкурент продолжает работать.',
+          deltas:[{t:'Цена −9%',c:'dn'},{t:'Продажи +5%',c:'dw'},{t:'Конкурент ответил симметрично',c:'dn'}],
+          lesson:'Ценовая война — проигрышная стратегия. Конкурент легко отвечает симметрично и продолжает работать.',
+          next:'2_price'
+        }
+      },
+      {
+        name: '⚖️ Посоветуюсь с юристом',
+        meta: '~5 тыс ₽ на консультацию',
+        type: 'good',
+        effect: s => ({ cash:s.cash-5, score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Юрист открыл глаза',
+          text:'Юрист сказал: технологические инновации и уникальные продукты надо защищать юридически. Порекомендовал получить патент — он даёт исключительное право на технологию: можно заблокировать конкурента, взыскать компенсацию, запретить продавать копии. Стоимость: 120–269 тыс ₽ + госпошлина, срок 6–14 месяцев. Перед патентованием — важный момент.',
+          deltas:[{t:'−5 тыс ₽',c:'dn'},{t:'Знаете что делать',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'Правильный первый шаг — разобраться в инструментах, а не действовать хаотично.',
+          next:'3_secret_warning'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ВЕТКА: ПИСЬМО → отзывы
+  // ────────────────────────────────────────────────
+  '2_letter': {
+    pathPos: 2,
+    tag: 'Репутационный кризис',
+    title: 'Появились плохие отзывы',
+    body: 'После вашего письма конкурент рассказал историю в отраслевом чате. Теперь 12 негативных отзывов на площадках. Клиенты сомневаются. Продажи начинают падать.',
+    info: 'Репутация напрямую влияет на продажи. Но помните: конкурент всё ещё продаёт похожий товар — это главная нерешённая проблема.',
+    choices: [
+      {
+        name: '💸 Снижу цену — может клиенты останутся',
+        meta: 'Цена −9% · быстрое решение',
+        type: 'bad',
+        effect: s => ({ price: Math.round(s.price*0.91), sales: Math.round(s.sales*1.05), reputation: s.reputation-10 }),
+        result: {
+          icon:'📉', head:'Цена упала — конкурент ответил тем же',
+          text:'Снизили цену на 9%. Часть клиентов успокоилась. Но конкурент тоже снизил цену. Прибыль с каждого заказа упала, а отзывы никуда не делись. Репутация продолжает страдать.',
+          deltas:[{t:'Цена −9%',c:'dn'},{t:'Прибыль с заказа упала',c:'dn'},{t:'Репутация −10',c:'dn'}],
+          lesson:'Ценовая война не лечит репутацию и не останавливает конкурента.',
+          next:'3_back_to_competitor'
+        }
+      },
+      {
+        name: '⚖️ Посоветоваться с юристом',
+        meta: '5 тыс ₽ · узнать реальные варианты защиты',
+        type: 'good',
+        effect: s => ({ cash:s.cash-5, score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💼', head:'Юрист объяснил: письма недостаточно',
+          text:'Юрист выслушал и сказал прямо: «Гневное письмо без правовых оснований конкурент может проигнорировать. Единственный рабочий инструмент — патент. Он даёт исключительное право и возможность потребовать компенсацию».',
+          deltas:[{t:'−5 тыс ₽',c:'dn'},{t:'Понял суть проблемы',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'Юрист за 5 тыс ₽ сэкономил месяцы экспериментов. Правильный диагноз — половина лечения.',
+          next:'3_back_to_competitor'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ВОЗВРАТ К ПРОБЛЕМЕ: конкурент продолжает! (после всех веток отзывов)
+  // ────────────────────────────────────────────────
+  '3_back_to_competitor': {
+    pathPos: 2,
+    tag: 'Главная проблема не решена',
+    title: 'Конкурент продолжает продавать',
+    body: 'Конкурент как продавал похожий товар, так и продаёт. Каждый месяц он забирает часть ваших клиентов. Нужно принимать решение.',
+    warn: 'Без юридической защиты технологии — любое ваше решение временное. Конкурент может масштабироваться и перекупить ваших клиентов. Что будете делать?',
+    choices: [
+      {
+        name: '😤 Продолжу бороться маркетингом — запущу рекламу',
+        meta: '100 тыс ₽',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-100, sales:s.sales+2, score:s.score+50 }),
+        result: {
+          icon:'📢', head:'Удалось привлечь 2 новых клиентов',
+          _textFn: s => {
+            const addRev = 2 * s.price;
+            const addProfit = Math.round(addRev - addRev * s.costPct);
+            return `Реклама сработала — пришло 2 новых клиента. Доп. выручка: ${addRev} тыс ₽/мес, доп. прибыль: ~${addProfit} тыс ₽/мес (без учёта фикс. расходов). Но конкурент тоже не отстаёт: запустил свою рекламу и предлагает цену на 6% ниже. Продолжать или остановить?`;
+          },
+          text: '',
+          deltas:[{t:'−100 тыс ₽',c:'dn'},{t:'Продажи +2/мес',c:'dw'},{t:'Конкурент тоже рекламируется',c:'dn'}],
+          lesson:'Реклама привлекает клиентов, но без защиты технологии конкурент копирует и вашу маркетинговую стратегию.',
+          next:'3_ad_budget'
+        }
+      },
+      {
+        name: '⚖️ Понял — нужно защитить технологию юридически',
+        meta: 'Конкурент продолжает работать — нужно принимать решение',
+        type: 'good',
+        effect: s => ({ score:s.score+300, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Правильное решение',
+          text:'Вы наконец добрались до корня проблемы. Пока у вас нет правовой защиты технологии — конкурент будет продолжать. Юрист подтвердил: патент решит вопрос раз и навсегда.',
+          deltas:[{t:'Верный вывод',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Любые тактические решения — временные. Патент — единственный инструмент, дающий исключительное право.',
+          next:'3_secret_warning'
+        }
+      }
+    ]
+  },
+
+  // ── Выбор: продолжать рекламу или нет ──
+  '3_ad_budget': {
+    pathPos: 2,
+    tag: 'Реклама',
+    title: 'Что делать с рекламным бюджетом?',
+    body: 'Реклама принесла 2 новых клиента. Месячный бюджет — 100 тыс ₽. Конкурент тоже рекламируется. Продолжать в том же темпе, увеличить бюджет или выключить?',
+    info: null,
+    choices: [
+      {
+        name: '🔇 Выключить рекламу — не окупается',
+        meta: 'Экономия 100 тыс ₽/мес',
+        type: 'bad',
+        effect: s => ({ sales:s.sales-2 }),
+        result: {
+          icon:'📵', head:'Новые клиенты перестали приходить',
+          text:'Реклама выключена. Два клиента, которые пришли через неё, сделали по одному заказу и ушли — без постоянного присутствия в рекламе они вас не видят. Продажи вернулись к прежнему уровню.',
+          deltas:[{t:'Экономия 100 тыс ₽/мес',c:'dw'},{t:'Продажи −2/мес',c:'dn'},{t:'Новые клиенты не приходят',c:'dn'}],
+          lesson:'Реклама работает пока она работает. Выключил — поток остановился.',
+          next:'3_back_to_competitor_2'
+        }
+      },
+      {
+        name: '▶️ Продолжить в том же темпе',
+        meta: '100 тыс ₽/мес постоянно · +2 продажи каждый месяц',
+        type: 'warn',
+        effect: s => ({ opexFixed: s.opexFixed+100, sales: s.sales+2, score:s.score+100, _adActive: true }),
+        result: {
+          icon:'📊', head:'Реклама работает — расходы растут',
+          _textFn: s => {
+            const newProfit = Math.round(s.sales * s.price - s.sales * s.price * s.costPct - s.opexFixed);
+            return `Реклама включена на постоянной основе. +2 клиента каждый месяц. Но расходы цеха выросли на 100 тыс ₽/мес — теперь прибыль ~${newProfit} тыс ₽/мес. Конкурент тоже рекламируется рядом.`;
+          },
+          text:'',
+          deltas:[{t:'Расходы +100 тыс ₽/мес постоянно',c:'dn'},{t:'Продажи +2/мес',c:'dp'}],
+          lesson:'Реклама без правовой защиты — гонка бюджетов. Конкурент видит ту же аудиторию.',
+          next:'3_back_to_competitor_2'
+        }
+      },
+      {
+        name: '🚀 Увеличить бюджет в 3 раза — 300 тыс ₽/мес',
+        meta: 'Агрессивный рост · высокий риск',
+        type: 'good',
+        effect: s => ({ cash:s.cash-300, sales:s.sales+3, score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'📈', head:'Охват вырос — и произошло кое-что неожиданное',
+          text:'Увеличенный бюджет дал +3 новых клиента в месяц. А потом случилось неожиданное: по рекламе на вас вышел крупный завод и запросил партию в 15 единиц сразу.',
+          deltas:[{t:'−300 тыс ₽',c:'dn'},{t:'Продажи +3/мес',c:'dp'},{t:'Крупный клиент заинтересовался!',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'',
+          next:'3_ad_bigclient'
+        }
+      }
+    ]
+  },
+
+  // ── Крупный клиент через рекламу ──
+  '3_ad_bigclient': {
+    pathPos: 2,
+    tag: 'Большой заказ',
+    title: 'Крупный завод хочет партию',
+    body: null,
+    _bodyFn: s => {
+      const units = 15;
+      const revenue = units * s.price;
+      const cogs = Math.round(revenue * s.costPct);
+      const profit = Math.round(revenue - cogs - s.opexFixed);
+      return `Крупный завод вышел на вас через рекламу и запросил партию: <b>${units} единиц</b> сразу.<br><br>
+        Считаем экономику заказа:<br>
+        • Выручка: ${units} × ${s.price} тыс ₽ = <b>${revenue} тыс ₽</b><br>
+        • Себестоимость (${Math.round(s.costPct*100)}%): −${cogs} тыс ₽<br>
+        • Доп. расходы цеха на партию: −${s.opexFixed} тыс ₽<br>
+        • <b>Прибыль с заказа: ~${profit} тыс ₽</b><br><br>
+        Реклама за 3 месяца обошлась в 900 тыс ₽ (300 × 3). Один крупный заказ уже окупает половину. Плюс завод обсуждает регулярные поставки.`;
+    },
+    info: 'Это показывает: реклама — это инвестиция, которая может дать непропорционально большой результат.',
+    choices: [
+      {
+        name: '🤝 Принять заказ и договориться о регулярных поставках',
+        meta: 'Максимальный результат',
+        type: 'good',
+        effect: s => {
+          const revenue = 15 * s.price;
+          const profit = Math.round(revenue - revenue*s.costPct - s.opexFixed);
+          return { cash:s.cash+profit, sales:s.sales+5, score:s.score+600, goodChoices:s.goodChoices+1 };
+        },
+        result: {
+          icon:'🏭', head:'Крупный клиент стал постоянным',
+          _textFn: s => {
+            const newClients = Math.round((s.baseSales || s.sales) * 0.3);
+            const addProfit = Math.round(newClients * s.price * (1 - s.costPct));
+            return `Заказ выполнен, завод доволен. Договорились на регулярные поставки: +${newClients} клиентов/мес, доп. прибыль ~${addProfit} тыс ₽/мес. Но конкурент уже предложил заводу «такое же, но дешевле» — без патента остановить его нельзя.`;
+          },
+          text:'',
+          deltas:[{t:'Продажи выросли',c:'dp'},{t:'Конкурент не устранён',c:'dw'},{t:'+600 очков',c:'dp'}],
+          lesson:'Рост без защищённой технологии уязвим — конкурент скопирует и придёт к тому же клиенту.',
+          next:'3_back_to_competitor_2'
+        }
+      }
+    ]
+  },
+
+  '3_back_to_competitor_2': {
+    pathPos: 2,
+    tag: 'Итог ситуации',
+    title: 'Пора принять стратегическое решение',
+    _bodyFn: s => {
+      const profit = Math.round(s.sales * s.price - s.sales * s.price * s.costPct - s.opexFixed);
+      const profitColor = profit > 0 ? '' : ' (убыток!)';
+      return `Несколько месяцев прошло. Вот где вы сейчас:\n\n• Свободные деньги: <b>${s.cash} тыс ₽</b>\n• Продаж: <b>${s.sales}/мес</b>\n• Прибыль: <b>${profit} тыс ₽/мес${profitColor}</b>\n\nКонкурент продолжает продавать похожий товар. Что будете делать?`;
+    },
+    body: null,
+    warn: null,
+    info: 'Каждый месяц без юридической защиты технологии — конкурент укрепляется.',
+    choices: [
+      {
+        name: '🔬 Вложить деньги в улучшение продукта',
+        meta: '−500 тыс ₽ · продукт станет лучше конкурента',
+        type: 'warn',
+        effect: s => ({ cash: s.cash-500, price: Math.round(s.price*1.08), sales: s.sales+3, score: s.score+200 }),
+        result: {
+          icon:'🚀', head:'Продукт лучше — но ненадолго',
+          _textFn: s => {
+            const newRev = s.sales * s.price;
+            const newProfit = Math.round(newRev - newRev * s.costPct - s.opexFixed);
+            return `Вы вложили 500 тыс ₽ и улучшили продукт. Подняли цену на 8%, пришло +3 клиента. Прибыль выросла до ~${newProfit} тыс ₽/мес. Конкурент отстал... на 3 месяца.`;
+          },
+          text:'',
+          deltas:[{t:'−500 тыс ₽',c:'dn'},{t:'Цена +8%',c:'dp'},{t:'Продажи +3/мес',c:'dp'}],
+          lesson:'Улучшение без патента — временное преимущество. Конкурент скопирует.',
+          next:'3_competitor_copied'
+        }
+      },
+      {
+        name: '⚖️ Патентовать технологию',
+        meta: 'Единственный инструмент остановить конкурента',
+        type: 'good',
+        effect: s => ({ score:s.score+300, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Верное решение — идём патентовать',
+          text:'Пока у вас нет правовой защиты технологии — конкурент будет продолжать. Патент даёт исключительное право на 20 лет: можно заблокировать конкурента или взыскать компенсацию.',
+          deltas:[{t:'Верное направление',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Улучшение продукта — правильно, но без патента конкурент скопирует снова.',
+          next:'3_secret_warning'
+        }
+      },
+      {
+        name: '🏳️ Продать бизнес конкуренту',
+        meta: 'Выход из игры',
+        type: 'bad',
+        effect: s => {
+          const bizVal = Math.round(s.sales * s.price * 12 * 0.15); // без патента - копейки
+          return { cash: s.cash + bizVal, score: s.score-500 };
+        },
+        result: {
+          icon:'😔', head:'Бизнес продан за бесценок',
+          _textFn: s => {
+            const bizVal = Math.round(s.sales * s.price * 12 * 0.15);
+            const withPatent = Math.round(s.sales * s.price * 12 * 1.5);
+            return `Конкурент предложил ${bizVal} тыс ₽. Без патента у вас нет рычагов торговаться. Технология не защищена — он может скопировать всё бесплатно, зачем платить больше?\n\nЕсли бы технология была запатентована — оценка была бы ~${withPatent} тыс ₽.`;
+          },
+          text:'',
+          deltas:[{t:'Бизнес продан дёшево',c:'dn'},{t:'−500 очков',c:'dn'}],
+          lesson:'Незащищённый актив ничего не стоит на переговорах. Патент — это рычаг цены.',
+          next:'final_bad'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ВЕТКА: конкурент скопировал улучшение
+  // ────────────────────────────────────────────────
+  '3_competitor_copied': {
+    pathPos: 2,
+    tag: 'Конкурент скопировал',
+    title: 'Конкурент выпустил такую же улучшенную версию',
+    _bodyFn: s => {
+      const profit = Math.round(s.sales * s.price - s.sales * s.price * s.costPct - s.opexFixed);
+      return `Прошло 3 месяца. Конкурент изучил ваш обновлённый продукт и выпустил аналог. Теперь снова продаёт дешевле. Ваши 500 тыс ₽ вложений не дали долгосрочного преимущества.\n\nСейчас: прибыль ~${profit} тыс ₽/мес, деньги: ${s.cash} тыс ₽.`;
+    },
+    body: null,
+    warn: 'Без патента любое улучшение продукта конкурент может скопировать. Снова и снова.',
+    choices: [
+      {
+        name: '⚖️ Теперь точно патентую — это надо было сделать раньше',
+        meta: 'Единственный способ остановить копирование',
+        type: 'good',
+        effect: s => ({ score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Правильный вывод — идём оформлять защиту',
+          text:'Вы поняли главный урок: улучшение продукта даёт временное преимущество. Патент даёт постоянное. Перед патентованием юрист хочет сказать кое-что важное.',
+          deltas:[{t:'Урок усвоен',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'Патент защищает инновацию. Без него R&D — это инвестиция в конкурентов.',
+          next:'3_secret_warning'
+        }
+      },
+      {
+        name: '🔬 Улучшу ещё раз — буду быстрее конкурента',
+        meta: '−500 тыс ₽ · снова временное преимущество',
+        type: 'bad',
+        effect: s => ({ cash:s.cash-500, score:s.score+50 }),
+        result: {
+          icon:'🔄', head:'История повторяется',
+          text:'Вы вложили ещё 500 тыс ₽. Через 3 месяца конкурент снова скопировал. Деньги потрачены, разрыв не накапливается. Без патента эта гонка бесконечная. Пора принять стратегическое решение.',
+          deltas:[{t:'−500 тыс ₽',c:'dn'},{t:'Конкурент снова скопирует',c:'dn'}],
+          lesson:'Скорость разработки — не защита. Патент — защита. После второй попытки это очевидно.',
+          next:'3_must_patent'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ВЕТКА: после второго улучшения — только патент
+  // ────────────────────────────────────────────────
+  '3_must_patent': {
+    pathPos: 2,
+    tag: 'Пора принять решение',
+    title: 'Два улучшения — конкурент скопировал оба',
+    _bodyFn: s => {
+      const profit = Math.round(s.sales * s.price - s.sales * s.price * s.costPct - s.opexFixed);
+      return `Вы дважды вложили по 500 тыс ₽. Конкурент скопировал оба раза. Это не случайность — без юридической защиты он будет копировать бесконечно.\n\nСейчас: прибыль ~${profit} тыс ₽/мес, деньги: ${s.cash} тыс ₽.\n\nПродолжать гонку бессмысленно. Нужно принять стратегическое решение.`;
+    },
+    body: null,
+    warn: 'Каждый месяц без патента — конкурент укрепляется на рынке, который вы создали.',
+    choices: [
+      {
+        name: '⚖️ Патентовать технологию — единственный выход',
+        meta: 'Защита на 20 лет · конкурент будет остановлен',
+        type: 'good',
+        effect: s => ({ score:s.score+400, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Наконец правильное решение',
+          text:'Два раза убедились: без патента любое улучшение конкурент скопирует. Патент — единственный инструмент, дающий исключительное право. Перед патентованием юрист хочет сказать кое-что важное.',
+          deltas:[{t:'Верное решение',c:'dp'},{t:'+400 очков',c:'dp'}],
+          lesson:'Патент останавливает конкурента юридически. Улучшения — нет.',
+          next:'3_secret_warning'
+        }
+      },
+      {
+        name: '🏳️ Продать бизнес — устал бороться',
+        meta: 'Выход из игры',
+        type: 'bad',
+        effect: s => {
+          const bizVal = Math.round(s.sales * s.price * 12 * 0.15);
+          return { cash: s.cash + bizVal, score: s.score-500 };
+        },
+        result: {
+          icon:'😔', head:'Бизнес продан за бесценок',
+          _textFn: s => {
+            const bizVal = Math.round(s.sales * s.price * 12 * 0.15);
+            const withPatent = Math.round(s.sales * s.price * 12 * 1.5);
+            return `Конкурент предложил ${bizVal} тыс ₽. Без патента — нет рычагов торговаться. С патентом оценка была бы ~${withPatent} тыс ₽.`;
+          },
+          text:'',
+          deltas:[{t:'Бизнес продан дёшево',c:'dn'},{t:'−500 очков',c:'dn'}],
+          lesson:'Незащищённый актив ничего не стоит на переговорах.',
+          next:'final_bad'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ВЕТКА: ЦЕНА → что дальше
+  // ────────────────────────────────────────────────
+  '2_price': {
+    pathPos: 2,
+    tag: 'Ценовая война',
+    title: 'Ценовая война: оба проиграли',
+    _bodyFn: s => {
+      const newProfit = Math.round(s.sales * s.price - s.sales * s.price * s.costPct - s.opexFixed);
+      return `Вы снизили цену на 9%. Конкурент снизил следом. Продаж стало чуть больше, но прибыль с каждого заказа упала. Расходы цеха фиксированные — они никуда не делись. Текущая прибыль: ~${newProfit} тыс ₽/мес. Конкурент продолжает работать.`;
+    },
+    body: null,
+    warn: 'Ценовая война не решает проблему. Без защиты технологии конкурент продолжит продавать сколько угодно.',
+    choices: [
+      {
+        name: '✅ Понял — снижать цену бессмысленно. Нужно защищать технологию.',
+        meta: 'Правильный вывод',
+        type: 'good',
+        effect: s => ({ price: Math.round(s.price/0.91), score: s.score+150, goodChoices: s.goodChoices+1 }),
+        result: {
+          icon:'💡', head:'Цена восстановлена. Идём защищать технологию.',
+          text:'Цену вернули. Ценовая война не остановит конкурента — он просто снизит цену следом. Единственный инструмент — юридическая защита технологии. Перед патентованием юрист хочет сказать кое-что важное.',
+          deltas:[{t:'Цена восстановлена',c:'dp'},{t:'+150 очков',c:'dp'}],
+          lesson:'Снижение цены — проигрышная стратегия против копировщика. Патент останавливает его юридически.',
+          next:'3_secret_warning'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // СОБЫТИЕ: юрист про коммерческую тайну (до патентования)
+  // ────────────────────────────────────────────────
+  '3_secret_warning': {
+    pathPos: 3,
+    tag: 'Юридическая безопасность',
+    title: 'Юрист: пока не ушли патентовать — важный момент',
+    _skipIfFn: s => s._secretWarningShown === true,
+    _skipNext: 4,
+    body: 'Перед тем как идти в патентное бюро, юрист обратил внимание: в вашей компании некорректно оформлены режим коммерческой тайны и договоры о передаче интеллектуальных прав с сотрудниками. Если ключевой технолог уйдёт к конкуренту — он унесёт все ноу-хау. Юридически вы ничего не докажете.',
+    info: 'Это можно оформить сейчас: положение о коммерческой тайне + NDA + договор о передаче прав на служебные разработки.',
+    choices: [
+      {
+        name: '✅ Потратить 120 тыс ₽ — оформить сейчас, пока все на месте',
+        meta: '120 тыс ₽ · юрист ИС сделает пакет под ключ',
+        type: 'good',
+        effect: s => ({ cash:s.cash-120, score:s.score+400, goodChoices:s.goodChoices+1, _secretDone:true }),
+        result: {
+          icon:'📋', head:'Документы оформлены. Компания защищена.',
+          text:'Юрист разработал пакет: положение о коммерческой тайне, NDA для всех сотрудников, договоры о передаче прав на служебные разработки. Все подписали. Теперь уход сотрудника не угрожает технологиям.',
+          deltas:[{t:'−120 тыс ₽',c:'dn'},{t:'Коммерческая тайна оформлена',c:'dp'},{t:'NDA подписаны',c:'dp'},{t:'+400 очков',c:'dp'}],
+          lesson:'Документы защищают не хуже патента — но другое. Патент защищает технологию, NDA защищает знания людей.',
+          next:4
+        }
+      },
+      {
+        name: '⏳ Сейчас некогда — займёмся после патента',
+        meta: 'Экономия 120 тыс ₽ · риск потом',
+        type: 'bad',
+        effect: s => ({ score:s.score+0 }),
+        result: {
+          icon:'⚠️', head:'Ладно, потом. Но технолог уже смотрит на конкурента.',
+          text:'Вы решили отложить. Документы не оформлены. Конкурент активно переманивает ваших сотрудников — главный технолог уже получил оффер.',
+          deltas:[{t:'Сэкономили 120 тыс ₽',c:'dw'},{t:'Документы не оформлены',c:'dn'},{t:'Технолог получил оффер',c:'dn'}],
+          lesson:'«Потом» в бизнесе часто означает «никогда». А сотрудники не ждут.',
+          next:4
+        }
+      }
+    ]
+  },
+
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 4: Патентование
+  // ────────────────────────────────────────────────
+  4: {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Кому поручите патентование?',
+    body: 'Решение принято — нужно патентовать. Теперь выберите, кто будет готовить и подавать заявку в Роспатент. От этого зависит стоимость, скорость и качество заявки.',
+    warn: null,
+    _warnFn: s => `У вас сейчас ${s.cash} тыс ₽ на счету — выбирайте взвешенно.`,
+    info: 'Патент даёт исключительное право на 20 лет. Чем грамотнее составлена заявка — тем шире объём защиты и сложнее конкуренту её обойти.',
+    choices: [
+      {
+        name: '👤 Поручу штатному технологу',
+        meta: 'Бесплатно · но риск ошибок высокий',
+        type: 'bad',
+        effect: s => ({ score:s.score+50, cash:s.cash-30 }),
+        result: {
+          icon:'😬', head:'Заявка вернулась с замечаниями — написали ответ и получили отказ',
+          text:'Технолог составил ответ на замечания Роспатента. Но специалист Роспатента прислал окончательный отказ: формула изобретения сформулирована некорректно, объём притязаний не соответствует требованиям. Потеряли 3 месяца и 30 тыс ₽ на пошлинах. Что делать дальше?',
+          deltas:[{t:'−30 тыс ₽ пошлины',c:'dn'},{t:'Потеряно 3 месяца',c:'dn'},{t:'Отказ Роспатента',c:'dn'}],
+          lesson:'Патентная заявка — юридический документ. Технолог знает продукт, но не умеет формулировать притязания.',
+          next:'4_redo'
+        }
+      },
+      {
+        name: '⚖️ Проверенный юрист общего профиля',
+        meta: '50 тыс ₽ + 30 тыс ₽ госпошлина · срок 12–18 мес · ⚠️ никогда не регистрировал ИС',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-80, score:s.score+300, goodChoices:s.goodChoices+1, _narrowPatent:true, patentType:'invention' }),
+        result: {
+          icon:'📄', head:'Заявка подана, но объём защиты узкий',
+          text:'Юрист справился, заявка принята. Госпошлина 30 тыс ₽ оплачена отдельно. Но он не специализируется на ИС — формулировки получились осторожными и узкими. Конкурент сможет слегка изменить конструкцию и обойти патент.',
+          deltas:[{t:'−50 тыс ₽ юрист',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Заявка принята',c:'dp'},{t:'Узкий объём защиты',c:'dw'},{t:'+300 очков',c:'dp'}],
+          lesson:'Юрист общего профиля — лучше, чем технолог, но хуже специалиста по ИС. Объём защиты имеет значение.',
+          next:5
+        }
+      },
+      {
+        name: '🧑‍💼 Частный патентный поверенный',
+        meta: '80 тыс ₽ + 30 тыс ₽ госпошлина · просит бриф на 10 стр · без гарантии переподачи',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-110, score:s.score+100, patentType:'invention', _narrowPatent:true }),
+        result: {
+          icon:'📋', head:'Патент получен, но объём защиты узкий',
+          text:'Поверенный прислал бриф на 10 страниц — пришлось заполнять самому. Не все технические признаки описали правильно, поверенный не разбирается в вашей технологии. Патент получен, но формула изобретения сформулирована узко. Поверенный сказал: «Ну вот так вышло, я своё сделал». Конкурент может слегка изменить конструкцию и обойти такой патент.',
+          deltas:[{t:'−80 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент получен',c:'dp'},{t:'Объём защиты узкий',c:'dn'},{t:'Нет гарантии переподачи',c:'dn'}],
+          lesson:'Поверенный без технического образования и без гарантии — риск узких притязаний. Исправить потом дорого.',
+          next:5
+        }
+      },
+      {
+        name: '🏢 Патентное бюро',
+        meta: '120–269 тыс ₽ + 30 тыс ₽ госпошлина · срок 6–18 мес · гарантия результата',
+        type: 'good',
+        effect: s => ({ score:s.score+100, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'🏢', head:'Выберите конкретное бюро',
+          text:'Правильное направление. На счету сейчас — изучите условия каждого бюро внимательно. Они отличаются по цене, подходу, гарантиям и квалификации специалистов.',
+          deltas:[{t:'Верное направление',c:'dp'}],
+          lesson:'Патентное бюро — надёжнее одиночного поверенного. Но бюро тоже разные — смотрите на критерии, а не только на цену.',
+          next:'4_bureau_choice'
+        }
+      }
+    ]
+  },
+
+  // ── Ветка поверенного: бриф ──
+  '4_brief': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Бриф на 10 страниц',
+    body: 'Поверенный прислал подробный бриф: нужно описать технологию, аналоги, отличия от существующих решений, область применения и ещё несколько разделов. Примерно один рабочий день на заполнение.',
+    info: 'Бриф нужен поверенному, чтобы правильно сформулировать объём патентной защиты. Чем подробнее — тем лучше заявка.',
+    choices: [
+      {
+        name: '📝 Потрачу день, заполню бриф',
+        meta: 'Один рабочий день',
+        type: 'warn',
+        effect: s => ({ score:s.score+50 }),
+        result: {
+          icon:'😬', head:'Заполнили, но кое-что упустили',
+          text:'Вы заполнили бриф за день. Но в разделе «аналоги» не указали один очевидный конкурирующий патент — поверенный не проверил, просто взял ваши данные. Роспатент нашёл этот патент при экспертизе и выставил запрос. Потеряли 3 месяца и заплатили +15 тыс ₽ за ответ на запрос. Патент в итоге получен, но объём защиты сузили.',
+          deltas:[{t:'Дополнительно −15 тыс ₽',c:'dn'},{t:'Потеряно 3 месяца',c:'dn'},{t:'Объём защиты сужен',c:'dw'},{t:'Патент получен',c:'dp'}],
+          lesson:'Бриф — это не формальность. Нужно либо заполнять очень тщательно, либо выбирать специалиста, который сам проводит патентный поиск.',
+          next:5
+        }
+      },
+      {
+        name: '🔍 Поищу другого специалиста — это подозрительно',
+        meta: 'Найти того, кто сам разберётся',
+        type: 'warn',
+        effect: s => ({ score:s.score+50 }),
+        result: {
+          icon:'🤔', head:'Нашли другого — но он не гарантирует переподачу',
+          text:'Новый поверенный показался более опытным. Но на вопрос о гарантиях ответил: «Я гарантирую качество своей работы — сильную заявку и переписку с Роспатентом. Но если откажут — переподача за отдельную плату». Для сравнения: серьёзные бюро включают бесплатную переподачу в договор. Что решаете?',
+          deltas:[],
+          lesson:'',
+          next:'4_no_guarantee'
+        }
+      }
+    ]
+  },
+
+  // ── Ветка: нет гарантий ──
+  '4_no_guarantee': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Этот поверенный не даёт никаких гарантий',
+    body: 'Поверенный объяснил: «Я гарантирую только качество своей работы. За результат — не отвечаю. Если Роспатент откажет — это ваши проблемы, я своё сделал».',
+    info: 'Для сравнения: серьёзные патентные бюро прописывают в договоре гарантию — если Роспатент откажет, они бесплатно переработают заявку и подадут заново. Это принципиальное отличие.',
+    choices: [
+      {
+        name: '✅ Ладно, продолжаем — всё равно дешевле',
+        meta: 'Риск отказа без компенсации',
+        type: 'warn',
+        effect: s => ({ score:s.score+100 }),
+        result: {
+          icon:'😔', head:'Роспатент прислал запрос. Потом — отказ.',
+          text:'Через 5 месяцев Роспатент прислал запрос на уточнение формулы. Поверенный взял +10 тыс ₽ за ответ и отправил его. Через 3 месяца — отказ: специалист Роспатента счёл, что изобретение не соответствует критерию «изобретательский уровень». Итого 8 месяцев потеряно, +10 тыс ₽ доп. расходов. Поверенный пожал плечами: «Я своё сделал». Начинать заново — за ваш счёт.',
+          deltas:[{t:'Дополнительно −10 тыс ₽',c:'dn'},{t:'8 месяцев потеряно',c:'dn'},{t:'Отказ Роспатента',c:'dn'},{t:'Поверенный не несёт ответственности',c:'dn'}],
+          lesson:'Отсутствие гарантии — это не честность, это перекладывание рисков на клиента. В бюро с гарантией переподача была бы бесплатной.',
+          next:'4_restart_after_rejection'
+        }
+      },
+      {
+        name: '🔎 Поищу бюро с гарантией переподачи в договоре',
+        meta: 'Искать бюро с гарантией переподачи',
+        type: 'good',
+        effect: s => ({ score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'✅', head:'Правильный ход — гарантия переподачи защищает вас',
+          text:'Серьёзные бюро прописывают в договоре: если Роспатент откажет — бюро за свой счёт перерабатывает заявку и подаёт повторно. Это не обещание результата от Роспатента — это ваша финансовая защита от переделки. Выберите такое бюро:',
+          deltas:[{t:'Верное решение',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'Гарантия переподачи = бюро уверено в своей работе и берёт риск на себя. Это принципиально отличается от «гарантирую качество своей работы».',
+          next:'4_bureau_choice'
+        }
+      }
+    ]
+  },
+
+  // ── Выбор бюро (из ветки гарантий) ──
+  '4_bureau_choice': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Выберите патентное бюро',
+    body: 'Сравните три бюро по ключевым критериям — они принципиально отличаются.',
+    warn: null,
+    _warnFn: s => `У вас сейчас ${s.cash} тыс ₽ на счету. Помните про 30 тыс ₽ госпошлины сверху к стоимости услуг.`,
+    info: null,
+    choices: [
+      {
+        name: '🏅 Институт Инноваций и Права — 239 тыс ₽ + 30 тыс ₽ госпошлина',
+        meta: '✅ Эксперт с техническим образованием  ✅ Без брифа — онлайн-консультация 1 ч  ✅ Гарантия в договоре  ✅ 7 лет  |  Аргумент: «Работаем с каждым клиентом индивидуально под ключ, без потоковости»',
+        type: 'good',
+        effect: s => ({ cash:s.cash-269, score:s.score+900, goodChoices:s.goodChoices+1, patentType:'invention', _usedIIP:true }),
+        result: {
+          icon:'🏆', head:'Патент получен за 6 месяцев — быстрее плана',
+          text:'ИИП провели онлайн-консультацию 1 час — сами собрали все данные, никакого брифа. Патентный эксперт с техническим образованием глубоко разобрался в технологии и сформулировал максимально широкие притязания. Патент на изобретение зарегистрирован за 6 месяцев — вдвое быстрее среднего срока. Гарантия выполнена.',
+          deltas:[{t:'−239 тыс ₽ услуги ИИП',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент за 6 мес — быстрее плана',c:'dp'},{t:'Широкий объём защиты',c:'dp'},{t:'Гарантия выполнена',c:'dp'},{t:'+900 очков',c:'dp'}],
+          lesson:'Работа под ключ без брифа, эксперт с техническим образованием — патент получен быстро и с максимальной защитой.',
+          next:5
+        }
+      },
+      {
+        name: '⚡ Патентомания — 190 тыс ₽ + 30 тыс ₽ госпошлина',
+        meta: '⚠️ Поверенный без технического образования  ⚠️ Бриф на 3 стр.  ✅ Гарантия есть  ⚠️ Работают на поток  |  Аргумент: «Подаём больше всех заявок в год в Роспатент»',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-220, score:s.score+500, goodChoices:s.goodChoices+1, patentType:'invention', _usedPatentomaniya:true }),
+        result: {
+          icon:'⚠️', head:'Патент получен, но нервов потрепали',
+          _textFn: s => {
+            const extraMonths = 6;
+            const lostPerMonth = Math.round(s.sales * s.price * s.profitPct * 0.2);
+            const totalLost = lostPerMonth * extraMonths;
+            return `Заполнили бриф на 3 стр. за полдня. Сказали, что взяли в работу — и пропали. Пришлось самому звонить и узнавать статус заявки, самому контролировать сроки. Через 14 месяцев — патент на изобретение. Хотя рассчитывали на 8 месяцев.\n\n«Подаём больше всех заявок» — именно поэтому работают на поток и менеджеры пропадают.\n\nЛишние 6 месяцев ожидания — это дополнительные потери: конкурент продавал свой товар ещё ${extraMonths} мес. Упущенная прибыль за этот срок: ~${totalLost} тыс ₽.`;
+          },
+          text:'',
+          deltas:[{t:'−190 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент на изобретение',c:'dp'},{t:'14 мес вместо 8',c:'dn'},{t:'Упущенная прибыль за 6 мес',c:'dn'},{t:'+500 очков',c:'dp'}],
+          lesson:'«Подаём больше всех заявок» — это причина, а не достижение. Поток заявок = поток клиентов без индивидуального внимания.',
+          next:5
+        }
+      },
+      {
+        name: '🏛 Империя патентов — 120 тыс ₽ + 30 тыс ₽ госпошлина',
+        meta: '❌ Поверенный без технического образования  ⚠️ Бриф на 2 стр.  ❌ Нет гарантии  ⚠️ 4 года опыта  |  Аргумент: «У нас дешевле конкурентов, но качество хорошее»',
+        type: 'bad',
+        effect: s => ({ cash:s.cash-165, score:s.score+200, patentType:'utility_model', _narrowPatent:true }),
+        result: {
+          icon:'📋', head:'Получили патент на полезную модель — объём защиты сужен',
+          text:'Заполнили бриф на 2 стр. Поверенный без технического образования, без гарантии. Роспатент прислал запрос через 6 мес — упустили ключевой признак. Бюро предложило компромисс: переоформить как полезную модель (проще пройти экспертизу). Доп. расходы +15 тыс ₽. Патент получен, но на полезную модель — объём защиты значительно уже, срок 10 лет вместо 20.',
+          deltas:[{t:'−120 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'−15 тыс ₽ доп. запрос',c:'dn'},{t:'Патент на полезную модель',c:'dw'},{t:'Срок 10 лет вместо 20',c:'dw'},{t:'Узкий объём защиты',c:'dn'}],
+          lesson:'«Дешевле и качество хорошее» — без гарантии и технического образования это просто слова. В итоге: узкая защита и риск проигрыша в суде.',
+          next:'5_utility_model_warning'
+        }
+      }
+    ]
+  },
+  '4_restart_after_rejection': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Начинаем заново — теперь с умом',
+    body: 'Потеряли время и деньги. Конкурент продолжает продавать. Теперь вы знаете: нужен специалист с техническим образованием, который сам разбирается в технологии — без брифов и с гарантией.',
+    warn: 'Выбирайте того, кто даёт гарантию получения патента и не перекладывает техническую работу на вас.',
+    choices: [
+      {
+        name: '🏅 Институт Инноваций и Права',
+        meta: '239 тыс ₽ + 30 тыс ₽ госпошлина · гарантия · эксперт с техническим образованием · без брифа',
+        type: 'good',
+        effect: s => ({ cash:s.cash-269, score:s.score+700, goodChoices:s.goodChoices+1, patentType:'invention' }),
+        result: {
+          icon:'🏆', head:'На этот раз всё правильно — патент за 6 месяцев',
+          text:'ИИП провели онлайн-консультацию 1 час — сами собрали все данные, никаких брифов. Патентный эксперт с техническим образованием разобрался в технологии глубоко. Патент получен за 6 месяцев — быстрее, чем у остальных. Гарантия выполнена.',
+          deltas:[{t:'−239 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент за 6 мес',c:'dp'},{t:'Гарантия выполнена',c:'dp'},{t:'+700 очков',c:'dp'}],
+          lesson:'После неудачного опыта — правильно выбрать тех, кто берёт всю работу на себя, не требует брифов и даёт гарантию.',
+          next:5
+        }
+      },
+      {
+        name: '⚡ Патентомания',
+        meta: '200 тыс ₽ + 30 тыс ₽ госпошлина · гарантия есть · бриф 3 стр. · работают на поток',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-220, score:s.score+400, goodChoices:s.goodChoices+1, patentType:'invention' }),
+        result: {
+          icon:'⚠️', head:'Патент получен, но снова пришлось контролировать',
+          text:'Бриф на 3 стр. заполнили за полдня. Снова пришлось самому напоминать о себе — через 2 месяца молчания позвонили сами. Патент получен через 13 месяцев вместо обещанных 8.',
+          deltas:[{t:'−190 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент получен',c:'dp'},{t:'13 мес · снова задержка',c:'dw'},{t:'+400 очков',c:'dp'}],
+          lesson:'Гарантия есть, но поток клиентов никуда не делся — менеджеры заняты сотнями дел одновременно.',
+          next:5
+        }
+      }
+    ]
+  },
+
+  // ── Ветка переделки заявки после технолога ──
+  '4_redo': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Отказ получен. Нужно переделывать.',
+    body: 'Роспатент отказал. Технолог не справился с юридической частью. Нужно обратиться к специалисту — переработать заявку и подать заново. Конкурент продолжает продавать всё это время.',
+    warn: 'Каждый месяц без патента — конкурент продаёт. Выбирайте специалиста внимательно: от этого зависит качество заявки.',
+    choices: [
+      {
+        name: '🧑‍💼 Частный патентный поверенный',
+        meta: '+80 тыс ₽ + 30 тыс госпошлина · бриф на 10 стр · без гарантии',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-110, score:s.score+100, patentType:'invention', _narrowPatent:true }),
+        result: {
+          icon:'📋', head:'Патент получен — но у вас узкий объём защиты',
+          text:'Заполнили бриф на 10 страниц. Поверенный подал заявку, патент получен. Но формулировки снова получились узкими — технические нюансы не учли при заполнении брифа. Конкурент может слегка изменить продукт и обойти такой патент.',
+          deltas:[{t:'−80 тыс ₽ услуги',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент получен',c:'dp'},{t:'Объём защиты узкий',c:'dn'}],
+          lesson:'Бриф перекладывает техническую работу на вас — и вы не специалист в патентовании.',
+          next:5
+        }
+      },
+      {
+        name: '🏢 Патентное бюро — надёжнее',
+        meta: 'От 120 до 239 тыс ₽ + 30 тыс ₽ госпошлина · часто дают гарантию переподачи',
+        type: 'good',
+        effect: s => ({ score:s.score+100, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'🏢', head:'Выберите бюро',
+          text:'Правильный выбор. После неудачного опыта с технологом — нужен тот, кто берёт полную ответственность. Выберите конкретное бюро:',
+          deltas:[{t:'Верное решение',c:'dp'}],
+          lesson:'После отказа — лучше не экономить. Профессиональное бюро минимизирует риск повторного отказа.',
+          next:'4_bureau_choice'
+        }
+      }
+    ]
+  },
+
+  // Ветка отложенного патента — ведёт на выбор специалиста
+  '4_delayed': {
+    pathPos: 3,
+    tag: 'Патентование',
+    title: 'Откладывать больше нельзя',
+    body: 'Прошло 3 месяца. Конкурент укрепил позиции. Ваши продажи сократились. Но — ещё не поздно. Конкурент ещё не получил патент, а значит приоритет можно занять.',
+    warn: 'Каждый день промедления = ещё один день без защиты. Нужно срочно выбрать специалиста и подать заявку.',
+    choices: [
+      {
+        name: '⚡ Действую немедленно — выбираю специалиста',
+        meta: 'Время критично',
+        type: 'good',
+        effect: s => ({ score:s.score+100, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'🏃', head:'Выбираем специалиста — каждый день на счету',
+          text:'Правильно. Не теряем времени — сразу к выбору того, кто подготовит заявку в Роспатент.',
+          deltas:[{t:'Решение принято',c:'dp'},{t:'+100 очков',c:'dp'}],
+          lesson:'Скорость подачи заявки фиксирует дату приоритета. Чем раньше — тем лучше.',
+          next:4
+        }
+      }
+    ]
+  },
+
+  // Предупреждение после полезной модели
+  '5_utility_model_warning': {
+    pathPos: 4,
+    tag: 'Важно',
+    title: 'Патент на полезную модель — что это значит?',
+    body: 'Вы получили патент, но на полезную модель, а не на изобретение. Это принципиальная разница:\n\n• Срок защиты: 10 лет вместо 20\n• Объём притязаний: уже — конкурент может изменить 1–2 детали и выйти за рамки патента\n• В суде: компенсация будет меньше, доказать нарушение сложнее',
+    warn: 'Если конкурент нанял патентного поверенного — он легко обойдёт полезную модель с узкими притязаниями.',
+    choices: [
+      {
+        name: '⚖️ Всё равно подать иск',
+        meta: 'Риск проигрыша выше · компенсация меньше',
+        type: 'warn',
+        effect: s => ({ score:s.score+100 }),
+        result: {
+          icon:'⚠️', head:'Переходим к иску — но шансы снижены',
+          text:'Вы решили действовать несмотря на ограниченный объём защиты. Суд будет сложнее.',
+          deltas:[],
+          lesson:'',
+          next:'5_lawsuit_narrow'
+        }
+      },
+      {
+        name: '🔄 Переоформить как изобретение — обратиться в ИИП',
+        meta: '239 тыс ₽ + 30 тыс ₽ · подать нормальный патент',
+        type: 'good',
+        effect: s => ({ cash:s.cash-269, score:s.score+400, goodChoices:s.goodChoices+1, patentType:'invention' }),
+        result: {
+          icon:'🔁', head:'Подаём заявку на изобретение',
+          text:'ИИП взялись. Провели онлайн-консультацию, переработали формулу с нуля. Через 10 месяцев получили полноценный патент на изобретение с широкими притязаниями.',
+          deltas:[{t:'−239 тыс ₽',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Патент на изобретение',c:'dp'},{t:'Широкий объём защиты',c:'dp'}],
+          lesson:'Лучше потратить ещё раз, чем идти в суд с заведомо слабым патентом.',
+          next:5
+        }
+      }
+    ]
+  },
+
+  // Иск с полезной моделью — проигрыш
+  '5_lawsuit_utility': {
+    pathPos: 4,
+    tag: 'Суд',
+    title: 'Суд по патенту на полезную модель',
+    body: null,
+    _bodyFn: s => {
+      const baseSales = s.baseSales || s.sales;
+      const lostProfit = Math.round(baseSales * s.price * s.profitPct * 10 * 0.2);
+      return `Вы подали иск. Юрист конкурента указал суду: его продукт отличается от вашей полезной модели в двух деталях — и это действительно так. Узкие притязания не покрывают его версию товара.\n\nРасходы на юриста: −120 тыс ₽\nКомпенсация: 0 ₽\nВаша упущенная прибыль: ~${lostProfit} тыс ₽ — не возмещена.\n\nСуд отказал в иске.`;
+    },
+    info: 'Это прямое следствие полезной модели с узкими притязаниями. При патенте на изобретение с широкими притязаниями суд бы выиграли.',
+    choices: [
+      {
+        name: '📋 Принять поражение и переделать патент',
+        meta: '−120 тыс ₽ юристу · начать заново с ИИП',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-120-269-30, score:s.score+200, goodChoices:s.goodChoices+1, patentType:'invention' }),
+        result: {
+          icon:'📚', head:'Дорогой урок. Переоформляем.',
+          text:'Итого потери: −120 тыс ₽ юристу (проигранный суд) + −239 тыс ₽ услуги ИИП + −30 тыс ₽ госпошлина = −389 тыс ₽. ИИП провели онлайн-консультацию, переработали формулу с нуля. Патент на изобретение получен. Теперь можно снова идти в суд — с сильной позицией.',
+          deltas:[{t:'−120 тыс ₽ юристу (суд)',c:'dn'},{t:'−239 тыс ₽ услуги ИИП',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Итого: −389 тыс ₽',c:'dn'},{t:'Патент на изобретение',c:'dp'},{t:'+200 очков',c:'dp'}],
+          lesson:'Экономия на патентовании обошлась втрое дороже. Объём патентной защиты — это не детали, это деньги.',
+          next:'5_tm'
+        }
+      }
+    ]
+  },
+
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 5: Патент получен
+  // ────────────────────────────────────────────────
+  5: {
+    pathPos: 4,
+    tag: 'Победа',
+    title: 'Патент получен. Конкурент продаёт.',
+    body: 'Поздравляем — патент зарегистрирован в Роспатенте! Теперь у вас есть исключительное право на технологию. Конкурент всё ещё продаёт похожий товар. Как действовать?',
+    _warnFn: s => s._narrowPatent
+      ? '⚠️ Ваш патент имеет узкие притязания — специалист без технического образования не смог охватить всю технологию. Если подадите иск, конкурент может найти лазейку.'
+      : null,
+    info: 'Три варианта: заблокировать через суд, предложить лицензию или использовать как маркетинговый актив.',
+    choices: [
+      {
+        name: '⚖️ Подать иск — потребовать прекратить продажи',
+        meta: '120 тыс ₽ юристу · исход суда не гарантирован',
+        _typeFn: s => s._narrowPatent ? 'bad' : 'good',
+        type: 'good',
+        effect: s => ({
+          cash: s._narrowPatent ? s.cash - 120 : s.cash - 120 + 980,
+          score: s._narrowPatent ? s.score + 100 : s.score + 700,
+          goodChoices: s._narrowPatent ? s.goodChoices : s.goodChoices + 1
+        }),
+        result: {
+          icon:'🛡',
+          _headFn: s => s._narrowPatent ? 'Суд проигран — формулировки слишком узкие' : 'Суд выиграли. Конкурент заблокирован.',
+          head: '',
+          _textFn: s => s._narrowPatent
+            ? `Юрист конкурента нашёл лазейку: из-за узких притязаний патента его продукт формально не нарушает ваших прав. Специалист без технического образования не смог охватить всю технологию.\n\n• Юрист: −120 тыс ₽\n• Компенсация: 0 ₽\n• Конкурент продолжает продавать\n\nЧтобы выиграть суд — нужно перепатентовать с ИИП: широкие притязания исключают лазейки.`
+            : `Юрист предупреждал: гарантий нет, но сильная доказательная база. Суд встал на вашу сторону.\n\n• Конкурент обязан прекратить продажи\n• Компенсация: +980 тыс ₽\n• Юрист: −120 тыс ₽\n• Итого в кассу: +860 тыс ₽`,
+          text: '',
+          _deltasFn: s => s._narrowPatent
+            ? [{t:'−120 тыс ₽ юристу',c:'dn'},{t:'Компенсация: 0 ₽',c:'dn'},{t:'Суд проигран',c:'dn'}]
+            : [{t:'+980 тыс ₽ компенсация',c:'dp'},{t:'−120 тыс ₽ юристу',c:'dn'},{t:'Итого: +860 тыс ₽',c:'dp'},{t:'Конкурент ушёл с рынка',c:'dp'},{t:'+700 очков',c:'dp'}],
+          deltas: [],
+          lesson:'',
+          _lessonFn: s => s._narrowPatent
+            ? 'Узкий патент = проигранный суд. Специалист с техническим образованием формулирует притязания шире — конкурент не найдёт лазейку.'
+            : 'Патент — оружие. Широкие притязания решают исход суда.',
+          _nextFn: s => s._narrowPatent ? '5_lawsuit_narrow_result' : '5_clients_from_competitor'
+        }
+      },
+      {
+        name: '🤝 Предложить лицензионный договор',
+        meta: 'Конкурент платит вам % с каждой продажи',
+        type: 'good',
+        effect: s => ({ cash:s.cash+300, score:s.score+600, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'💰', head:'Конкурент платит — но продолжает работать на рынке',
+          text:'Конкурент согласился платить лицензию — 5% с каждой продажи. Пассивный доход появился. Но конкурент легально остаётся на рынке и продолжает бороться за клиентов.',
+          deltas:[{t:'Лицензионный доход: +300 тыс ₽',c:'dp'},{t:'Конкурент остаётся на рынке',c:'dw'},{t:'+600 очков',c:'dp'}],
+          lesson:'Лицензирование превращает конкурентов в источник дохода. Иногда лучше суда.',
+          next:'5_tm'
+        }
+      },
+      {
+        name: '📢 Объявить о патенте в рекламе',
+        meta: 'Маркетинговый эффект · конкурент пока работает',
+        type: 'warn',
+        effect: s => ({ reputation:s.reputation+20, sales:s.sales+2, score:s.score+300 }),
+        result: {
+          icon:'📣', head:'Рынок узнал о патенте',
+          text:'«Запатентованная технология» в рекламе повысила доверие. Продажи выросли на 2 заказа. Но конкурент ещё работает — объявления мало, нужно юридически его остановить.',
+          deltas:[{t:'Репутация +20',c:'dp'},{t:'Продажи +2/мес',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Патент — маркетинговый актив. Но без юридического давления конкурент продолжит.',
+          next:'5_tm'
+        }
+      }
+    ]
+  },
+
+  // ── Иск с узкими притязаниями (патентный поверенный) ──
+  '5_lawsuit_narrow': {
+    pathPos: 4,
+    tag: 'Суд',
+    title: 'Иск подан — но формулировки подвели',
+    _bodyFn: s => {
+      const lostProfit = Math.round((s.baseSales || s.sales) * s.price * s.profitPct * 10 * 0.2);
+      return `Вы подали иск. Юрист конкурента обнаружил слабое место: из-за узких формулировок в заявке — заполненной со слов клиента, без технического эксперта — его продукт формально выходит за рамки вашего патента. Достаточно было изменить 1–2 детали.
+
+Результат:
+• Доказать нарушение не удалось
+• Компенсация: 0 ₽
+• Юрист: −120 тыс ₽
+• Конкурент продолжает продавать
+• Ваша упущенная прибыль: ~${lostProfit} тыс ₽ — не возмещена`;
+    },
+    body: null,
+    warn: 'Это прямое следствие брифа: вы заполняли технические детали сами, без патентного эксперта с профильным образованием.',
+    choices: [
+      {
+        name: '🔄 Перепатентовать с ИИП — сделать правильно',
+        meta: '239 тыс ₽ услуги + 30 тыс ₽ госпошлина · широкие притязания · без брифа',
+        type: 'good',
+        effect: s => ({ cash:s.cash-120-269-30, score:s.score+300, goodChoices:s.goodChoices+1, patentType:'invention', _narrowPatent:false }),
+        result: {
+          icon:'🔁', head:'Перепатентовали через ИИП — теперь защита настоящая',
+          text:'ИИП провели онлайн-консультацию, сами разобрались в технологии без брифа. Патент переработан с нуля с широкими притязаниями. Теперь конкурент не сможет обойти патент косметическими изменениями. Теперь можно снова подать иск — и выиграть.',
+          deltas:[{t:'−120 тыс ₽ юристу (иск)',c:'dn'},{t:'−239 тыс ₽ ИИП',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Широкие притязания',c:'dp'},{t:'Можно подать иск заново',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Бриф перекладывает техническую работу на клиента — и вы не специалист в патентовании. ИИП делает всё сам.',
+          next:'5_after_repatent'
+        }
+      }
+    ]
+  },
+
+  // ── Результат проигранного иска с узким патентом ──
+  '5_lawsuit_narrow_result': {
+    pathPos: 4,
+    tag: 'Суд проигран',
+    title: 'Что делать дальше?',
+    body: 'Суд проигран из-за узких формулировок патента. Конкурент продолжает продавать. Чтобы подать иск снова и выиграть — нужно перепатентовать с ИИП: эксперт с техническим образованием сформулирует широкие притязания без брифа.',
+    warn: 'Каждый месяц промедления — конкурент укрепляется.',
+    choices: [
+      {
+        name: '🔄 Перепатентовать с ИИП и снова подать иск',
+        meta: '239 тыс ₽ услуги + 30 тыс ₽ госпошлина · широкие притязания · без брифа',
+        type: 'good',
+        effect: s => ({ cash: s.cash-239-30, score: s.score+300, goodChoices: s.goodChoices+1, patentType:'invention', _narrowPatent:false, _usedIIP:true }),
+        result: {
+          icon:'🔁', head:'Перепатентовали — теперь широкая защита',
+          text:'ИИП провели онлайн-консультацию, сами разобрались в технологии без брифа. Патент переработан с широкими притязаниями. Конкурент больше не найдёт лазейку.',
+          deltas:[{t:'−239 тыс ₽ услуги ИИП',c:'dn'},{t:'−30 тыс ₽ госпошлина',c:'dn'},{t:'Широкие притязания',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Второй шанс стоит дороже — но теперь суд выиграете.',
+          next:'5_after_repatent'
+        }
+      },
+      {
+        name: '🤝 Предложить конкуренту лицензию — не тратиться на суд',
+        meta: '+300 тыс ₽ · конкурент платит роялти',
+        type: 'warn',
+        effect: s => ({ cash: s.cash+300, score: s.score+400, goodChoices: s.goodChoices+1 }),
+        result: {
+          icon:'💰', head:'Конкурент согласился платить лицензию',
+          text:'Без сильного патента суд снова может не получиться. Предложили лицензионный договор — конкурент согласился платить роялти. Пассивный доход появился, но конкурент остаётся на рынке.',
+          deltas:[{t:'+300 тыс ₽ аванс',c:'dp'},{t:'Конкурент остаётся',c:'dw'},{t:'+400 очков',c:'dp'}],
+          lesson:'Иногда монетизировать конкурента выгоднее чем тратиться на суд без гарантии.',
+          next:'5_tm'
+        }
+      }
+    ]
+  },
+
+  // ── Иск после перепатентования с ИИП ──
+  '5_after_repatent': {
+    pathPos: 4,
+    tag: 'Второй иск',
+    title: 'Теперь у вас сильный патент — подаём иск',
+    _bodyFn: s => {
+      const profit = Math.round(s.sales * s.price * s.profitPct);
+      return `Патент переработан. Притязания широкие — конкурент больше не может обойти патент мелкими изменениями. Самое время потребовать компенсацию за всё время пока он продавал.\n\nЮрист говорит: гарантий нет, но позиция сильная. Расходы на иск: −120 тыс ₽.`;
+    },
+    body: null,
+    choices: [
+      {
+        name: '⚖️ Подать иск — получить компенсацию',
+        meta: '−120 тыс ₽ юристу · исход суда не гарантирован · позиция сильная',
+        type: 'good',
+        effect: s => ({ cash: s.cash - 120 + 980, score: s.score+700, goodChoices: s.goodChoices+1 }),
+        result: {
+          icon:'🛡', head:'Суд выигран. Конкурент заблокирован.',
+          text:'Широкие притязания сработали — конкурент не смог найти лазейку. Суд встал на вашу сторону.\n\n• Конкурент обязан прекратить продажи\n• Компенсация: +980 тыс ₽\n• Юрист: −120 тыс ₽\n• Итого: +860 тыс ₽\n\nВот почему важно патентовать через специалиста с техническим образованием — широкие притязания решили исход суда.',
+          deltas:[{t:'+980 тыс ₽ компенсация',c:'dp'},{t:'−120 тыс ₽ юристу',c:'dn'},{t:'Итого: +860 тыс ₽',c:'dp'},{t:'Конкурент ушёл с рынка',c:'dp'},{t:'+700 очков',c:'dp'}],
+          lesson:'Второй иск выигран благодаря широким притязаниям ИИП. Первый был проигран из-за узких.',
+          next:'5_clients_from_competitor'
+        }
+      },
+      {
+        name: '🤝 Предложить лицензию — пусть платит royalty',
+        meta: 'Без суда · пассивный доход',
+        type: 'warn',
+        effect: s => ({ cash: s.cash+300, score: s.score+500, goodChoices: s.goodChoices+1 }),
+        result: {
+          icon:'💰', head:'Конкурент согласился платить лицензию',
+          text:'Вместо суда предложили лицензионный договор. Конкурент согласился платить роялти — теперь его продажи приносят вам пассивный доход. Конкурент остаётся на рынке, но уже работает на вас.',
+          deltas:[{t:'+300 тыс ₽ аванс',c:'dp'},{t:'Пассивный доход с конкурента',c:'dp'},{t:'+500 очков',c:'dp'}],
+          lesson:'Сильный патент открывает два пути: заблокировать или монетизировать. Выбор за вами.',
+          next:'5_tm'
+        }
+      }
+    ]
+  },
+
+  // ── Клиенты конкурента приходят к вам ──
+  '5_clients_from_competitor': {
+    pathPos: 4,
+    tag: 'Рост продаж',
+    title: 'Клиенты конкурента ищут поставщика',
+    _bodyFn: s => {
+      const newClients = Math.round((s.baseSales || s.sales) * 0.3);
+      const addRevenue = newClients * s.price;
+      const addProfit = Math.round(addRevenue - addRevenue * s.costPct - 0);
+      return `Конкурент прекратил работу. Его клиенты остались без поставщика и начали звонить вам — они уже знали о вашем продукте.\n\nВ следующем месяце к вам перешло ~${newClients} новых клиентов.\n\nДополнительная выручка: ${addRevenue} тыс ₽/мес\nДополнительная прибыль: ~${addProfit} тыс ₽/мес\n\nЭти клиенты остаются с вами — теперь это ваша постоянная база.`;
+    },
+    body: null,
+    info: 'Патент не только защищает — он убирает конкурента и передаёт вам его рынок.',
+    choices: [
+      {
+        name: '🤝 Принять всех новых клиентов',
+        meta: 'Постоянный рост продаж',
+        type: 'good',
+        effect: s => {
+          const newClients = Math.round((s.baseSales || s.sales) * 0.3);
+          return { sales: s.sales + newClients, score: s.score + 300, goodChoices: s.goodChoices + 1 };
+        },
+        result: {
+          icon:'📈', head:'База клиентов выросла — патент окупился снова',
+          _textFn: s => {
+            const newClients = Math.round((s.baseSales || s.sales) * 0.3);
+            const addRevenue = newClients * s.price;
+            const addProfit = Math.round(addRevenue - addRevenue * s.costPct);
+            return `+${newClients} клиентов ежемесячно. Дополнительная прибыль: +${addProfit} тыс ₽/мес постоянно. Иск окупился — и принёс долгосрочный поток.`;
+          },
+          text:'',
+          deltas:[{t:'Продажи выросли постоянно',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Патент — это не только защита. Это конкурентное преимущество, которое приносит новых клиентов.',
+          next:'5_tm'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 5.5: Товарный знак
+  // ────────────────────────────────────────────────
+  '5_tm': {
+    pathPos: 4,
+    tag: 'Защита бренда',
+    title: 'А название вашего продукта защищено?',
+    body: 'Патент на технологию получен. Юрист задал важный вопрос: «А название вашего прибора зарегистрировано как товарный знак? Без этого конкурент может использовать похожее название и вводить клиентов в заблуждение».',
+    info: 'Регистрация товарного знака: госпошлина ~30 тыс ₽ + услуги бюро ~30 тыс ₽ = ~60 тыс ₽. Срок — 4–8 месяцев.',
+    choices: [
+      {
+        name: '✅ Да, регистрируем товарный знак',
+        meta: '~60 тыс ₽ · госпошлина + услуги',
+        type: 'good',
+        effect: s => ({ cash:s.cash-60, score:s.score+500, goodChoices:s.goodChoices+1, _tmRegistered:true }),
+        result: {
+          icon:'™️', head:'Название защищено',
+          text:'Заявка на товарный знак подана в Роспатент. Теперь и технология, и название вашего продукта под защитой. Конкурент не сможет использовать похожее название.',
+          deltas:[{t:'−60 тыс ₽',c:'dn'},{t:'Товарный знак зарегистрирован',c:'dp'},{t:'+500 очков',c:'dp'}],
+          lesson:'Патент защищает технологию. Товарный знак защищает бренд. Вместе они перекрывают все основные риски копирования.',
+          next:'5_journal'
+        }
+      },
+      {
+        name: '⏳ Не сейчас — патента достаточно',
+        meta: 'Экономия 60 тыс ₽ · риск потом',
+        type: 'bad',
+        effect: s => ({ score:s.score+0 }),
+        result: {
+          icon:'⚠️', head:'Пока обошлись... но ненадолго',
+          text:'Вы решили не регистрировать товарный знак. Технология защищена, но название — нет. Пока всё тихо.',
+          deltas:[{t:'Сэкономили 60 тыс ₽',c:'dw'}],
+          lesson:'',
+          next:'5_tm_bad'
+        }
+      }
+    ]
+  },
+
+  // Последствие отказа от ТЗ
+  '5_tm_bad': {
+    pathPos: 4,
+    tag: 'Последствие',
+    title: 'Конкурент маскируется под вас',
+    body: 'Прошло 4 месяца. Конкурент зарегистрировал название, очень похожее на ваше. Клиенты путают компании — заказывают у конкурента более дешёвый товар худшего качества.',
+    warn: 'Вы потеряли 22% клиентов за 2 месяца. Часть из них потом жаловалась на плохое качество — но в отзывах писали ваше название. Репутация страдает.',
+    choices: [
+      {
+        name: '⚖️ Срочно подать на регистрацию ТЗ и обратиться к юристу',
+        meta: '60 тыс ₽ + 20 тыс ₽ на юриста',
+        type: 'good',
+        effect: s => ({ cash:s.cash-80, sales:Math.round(s.sales*0.78), reputation:s.reputation-15, score:s.score+200, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'⚖️', head:'Поздно, но действуем',
+          text:'Подали заявку на ТЗ и направили претензию конкуренту. Суд обяжет его сменить название. Но 22% клиентов уже потеряны, репутация подпорчена — восстановление займёт время.',
+          deltas:[{t:'−80 тыс ₽',c:'dn'},{t:'Продажи −22%',c:'dn'},{t:'Репутация −15',c:'dn'},{t:'ТЗ подан',c:'dp'}],
+          lesson:'Товарный знак надо регистрировать сразу после патента — пока конкурент не занял похожее название.',
+          next:'5_journal'
+        }
+      },
+      {
+        name: '📢 Запустить рекламу — объяснить клиентам кто оригинал',
+        meta: '150 тыс ₽ · частично поможет',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-150, sales:Math.round(s.sales*0.85), reputation:s.reputation-10, score:s.score+100 }),
+        result: {
+          icon:'📣', head:'Реклама помогла, но не решила проблему',
+          text:'Часть клиентов разобралась кто оригинал. Но конкурент продолжает работать под похожим названием — без ТЗ запретить ему нельзя.',
+          deltas:[{t:'−150 тыс ₽',c:'dn'},{t:'Продажи −15%',c:'dn'},{t:'Репутация −10',c:'dn'}],
+          lesson:'Реклама лечит симптом. Без товарного знака проблема не решается юридически.',
+          next:'5_journal'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ЭТАП: Отраслевой журнал
+  // ────────────────────────────────────────────────
+  '5_journal': {
+    pathPos: 4,
+    tag: 'Репутация',
+    title: 'Отраслевой журнал предлагает статью',
+    body: 'Редактор крупного отраслевого журнала написал вам: «Хотим опубликовать материал о вашей компании и технологии. Стоимость размещения — 80 тыс ₽. Статья выйдет тиражом 15 000 экземпляров среди закупщиков и технологов промышленных предприятий».',
+    info: 'Ваша целевая аудитория — именно технологи и снабженцы заводов. Журнал читают люди, которые принимают решения о закупках.',
+    choices: [
+      {
+        name: '✅ Дать статью и упомянуть патент',
+        meta: '80 тыс ₽ · максимальный эффект',
+        type: 'good',
+        effect: s => ({ cash:s.cash-80, sales:s.sales+2, reputation:s.reputation+20, score:s.score+400, goodChoices:s.goodChoices+1 }),
+        result: {
+          icon:'📰', head:'Статья вышла — рынок узнал о патенте',
+          text:'Статья получилась сильной. Вы рассказали о технологии и отдельно упомянули патент — это добавило доверия. Через месяц пришло 3 новых запроса от заводов, которые прочитали материал.',
+          deltas:[{t:'−80 тыс ₽',c:'dn'},{t:'Продажи +2/мес',c:'dp'},{t:'Репутация +20',c:'dp'},{t:'+400 очков',c:'dp'}],
+          lesson:'Статья в отраслевом СМИ + упоминание патента = двойной эффект: продажи и доверие рынка.',
+          next:'5_secret'
+        }
+      },
+      {
+        name: '🚫 Отказать — дорого и непонятно зачем',
+        meta: 'Экономия 80 тыс ₽',
+        type: 'bad',
+        effect: s => ({ score:s.score+0 }),
+        result: {
+          icon:'🤷', head:'Возможность упущена',
+          text:'Вы отказали. Журнал опубликовал материал о конкуренте — тот согласился. Теперь его знают в отрасли лучше, чем вас.',
+          deltas:[{t:'Сэкономили 80 тыс ₽',c:'dw'},{t:'Конкурент в прессе',c:'dn'}],
+          lesson:'Отраслевые СМИ — прямой канал до вашей аудитории. Конкуренты этим пользуются.',
+          next:'5_secret'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ЭТАП: Коммерческая тайна и NDA
+  // ────────────────────────────────────────────────
+  '5_secret': {
+    pathPos: 5,
+    tag: 'Юридическая безопасность',
+    title: 'Юрист: у вас проблемы с документами',
+    body: 'Юрист провёл аудит и сообщил: в вашей компании некорректно оформлены режим коммерческой тайны и договоры о передаче интеллектуальных прав с сотрудниками. Если кто-то уйдёт — унесёт с собой знания, технологии и базу клиентов. Юридически защититься будет сложно.',
+    info: 'Правильное оформление включает: положение о коммерческой тайне, NDA с сотрудниками, договоры о передаче прав на служебные изобретения.',
+    choices: [
+      {
+        name: '✅ Потратить 120 тыс ₽ — переработать все документы',
+        meta: '120 тыс ₽ · юрист ИС оформит под ключ',
+        type: 'good',
+        effect: s => ({ cash:s.cash-120, score:s.score+500, goodChoices:s.goodChoices+1, _secretDone:true }),
+        result: {
+          icon:'📋', head:'Документы оформлены. Компания защищена.',
+          text:'Юрист разработал пакет: положение о коммерческой тайне, NDA для всех сотрудников, договоры о передаче прав на служебные разработки. Все подписали. Теперь уход сотрудника не угрожает технологиям.',
+          deltas:[{t:'−120 тыс ₽',c:'dn'},{t:'Коммерческая тайна оформлена',c:'dp'},{t:'NDA подписаны',c:'dp'},{t:'+500 очков',c:'dp'}],
+          lesson:'Документы — это не бюрократия. Это защита от самого частого риска: ухода ключевого сотрудника к конкуренту.',
+          next:6
+        }
+      },
+      {
+        name: '🙈 Забить — у нас хороший коллектив, всем доверяю',
+        meta: 'Экономия сейчас, риск потом',
+        type: 'bad',
+        effect: s => ({ score:s.score+0 }),
+        result: {
+          icon:'🤞', head:'Пока держится... но недолго',
+          text:'Вы решили не тратиться. В коллективе всё хорошо. Пока.',
+          deltas:[{t:'Сэкономили 120 тыс ₽',c:'dw'}],
+          lesson:'',
+          next:'5_secret_bad'
+        }
+      }
+    ]
+  },
+
+  // Последствие: сотрудник ушёл
+  '5_secret_bad': {
+    pathPos: 5,
+    tag: 'Кризис',
+    title: 'Ключевой сотрудник ушёл к конкуренту',
+    body: 'Ваш главный технолог — тот, кто знал всю технологию изнутри — уволился и перешёл к конкуренту. Через месяц конкурент начал предлагать улучшенную версию вашего продукта. Он знал все ваши ноу-хау, базу клиентов и планы.',
+    warn: 'Без оформленных NDA и договора о передаче прав — юридически доказать нарушение почти невозможно. Это называется «утечка знаний».',
+    choices: [
+      {
+        name: '⚖️ Идти в суд — попытаться доказать нарушение',
+        meta: '150 тыс ₽ · шансы низкие без документов',
+        type: 'bad',
+        effect: s => ({ cash:s.cash-150, reputation:s.reputation-15, sales:Math.max(3, s.sales-2), score:s.score-300 }),
+        result: {
+          icon:'😔', head:'Суд проигран — документов нет',
+          text:'Суд отказал: без подписанных NDA и договоров о передаче прав доказать нарушение не удалось. 150 тыс ₽ на юристов потрачено, времени потеряно много. Конкурент продолжает использовать ваши знания.',
+          deltas:[{t:'−150 тыс ₽',c:'dn'},{t:'Репутация −15',c:'dn'},{t:'Продажи −2/мес',c:'dn'},{t:'Суд проигран',c:'dn'},{t:'−300 очков',c:'dn'}],
+          lesson:'Без документов суд невозможен. NDA и договоры о передаче прав нужно оформлять при найме, а не после ухода.',
+          next:6
+        }
+      },
+      {
+        name: '📋 Срочно оформить документы для оставшихся сотрудников',
+        meta: '120 тыс ₽ · хотя бы защитить будущее',
+        type: 'good',
+        effect: s => ({ cash:s.cash-120, reputation:s.reputation-10, score:s.score+100, goodChoices:s.goodChoices+1, _secretDone:true }),
+        result: {
+          icon:'🔒', head:'Хотя бы остальные защищены',
+          text:'Прошлое не вернуть. Но теперь все оставшиеся сотрудники подписали NDA и договоры о передаче прав. Следующий уход не будет таким разрушительным.',
+          deltas:[{t:'−120 тыс ₽',c:'dn'},{t:'Репутация −10',c:'dn'},{t:'Документы оформлены',c:'dp'},{t:'+100 очков',c:'dp'}],
+          lesson:'Поздно, но правильно. Лучше сейчас, чем никогда.',
+          next:6
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 6: Масштабирование
+  // ────────────────────────────────────────────────
+  6: {
+    pathPos: 5,
+    tag: 'Рост',
+    title: 'Компания растёт. Куда вкладывать?',
+    body: 'Патент защищает позиции. Продажи восстановились и растут. Накопился свободный ресурс. Инвесторы интересуются. Стратегический выбор — куда направить усилия?',
+    info: 'Этот выбор определит тип компании на следующие 3 года.',
+    choices: [
+      {
+        name: '🔬 Инвестировать в R&D — разработать новые патенты',
+        meta: '478 тыс ₽ · формирует патентный портфель',
+        type: 'good',
+        effect: s => ({ cash:s.cash-478, score:s.score+800, goodChoices:s.goodChoices+1, reputation:s.reputation+15 }),
+        result: {
+          icon:'🔬', head:'Патентный портфель растёт — вложения окупятся',
+          _textFn: s => {
+            const annualRev = s.sales * s.price * 12;
+            const licenseIncome = Math.round(annualRev * 0.05);
+            const payback = Math.ceil(478 / (licenseIncome / 12));
+            return `Вложили 478 тыс ₽ в R&D, подали ещё 2 патентные заявки. Каждый патент — барьер для конкурентов и источник лицензионного дохода.\n\nПри вашей выручке ${annualRev} тыс ₽/год: лицензионная ставка 5% = +${licenseIncome} тыс ₽/год пассивно. Вложения окупятся примерно за ${payback} мес. Инвесторы оценивают патентный портфель как стратегический актив.`;
+          },
+          text:'',
+          deltas:[{t:'−478 тыс ₽',c:'dn'},{t:'2 новых заявки',c:'dp'},{t:'Репутация +15',c:'dp'},{t:'+800 очков',c:'dp'}],
+          lesson:'Патентный портфель — долгосрочный актив. Каждый патент повышает стоимость компании и создаёт пассивный доход через лицензирование.',
+          next:7
+        }
+      },
+      {
+        name: '🏦 Поставить ИС на баланс как НМА и привлечь инвестора',
+        meta: 'Оценка компании вырастет',
+        type: 'good',
+        effect: s => ({ cash:s.cash+600, score:s.score+700, goodChoices:s.goodChoices+1, reputation:s.reputation+10 }),
+        result: {
+          icon:'💼', head:'Оценка компании выросла',
+          _textFn: s => { const nma = Math.round(s.sales * s.price * 12 * 0.3); return `Патент поставлен на баланс как НМА. Оценка компании выросла на ~${nma} тыс ₽. Инвестор вошёл с чеком 600 тыс ₽ за долю в компании.`; },
+          text: '',
+          deltas:[{t:'+600 тыс ₽ инвестиций',c:'dp'},{t:`НМА на балансе`,c:'dp'},{t:'Репутация +10',c:'dp'},{t:'+700 очков',c:'dp'}],
+          lesson:'ИС на балансе = реальные деньги. Инвесторы платят за защищённые активы.',
+          next:7
+        }
+      },
+      {
+        name: '📣 Вложить в маркетинг и продажи',
+        meta: '300 тыс ₽ · быстрый рост продаж',
+        type: 'warn',
+        effect: s => ({ cash:s.cash-300, sales:s.sales+4, score:s.score+400 }),
+        result: {
+          icon:'📈', head:'Продажи выросли быстро',
+          text:'Маркетинг дал эффект — продажи выросли на 4–5 заказов в месяц. Но без нового R&D конкуренты рано или поздно подтянутся.',
+          deltas:[{t:'−300 тыс ₽',c:'dn'},{t:'Продажи +4/мес',c:'dp'},{t:'+400 очков',c:'dp'}],
+          lesson:'Маркетинг работает лучше, когда под ним есть технологический фундамент.',
+          next:7
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ЭТАП 7: Финальный выбор
+  // ────────────────────────────────────────────────
+  7: {
+    pathPos: 6,
+    tag: 'Лидерство',
+    title: 'Крупный игрок хочет купить лицензию',
+    body: 'К вам обратился крупный холдинг: хотят купить лицензию на вашу технологию для своего производства. Объём — потенциально сотни миллионов в год. Но есть условие: они хотят эксклюзивные права.',
+    info: 'Эксклюзивная лицензия = вы не можете продавать эту технологию никому другому. Неэксклюзивная — продаёте всем.',
+    choices: [
+      {
+        name: '🤝 Неэксклюзивная лицензия — продаём всем',
+        meta: 'Меньше за раз, больше в перспективе',
+        type: 'good',
+        effect: s => ({ cash:s.cash+200, score:s.score+900, goodChoices:s.goodChoices+1, reputation:s.reputation+20 }),
+        result: {
+          icon:'🌐', head:'Технология становится стандартом рынка',
+          text:'Холдинг согласился на неэксклюзив. Теперь вы продаёте лицензию ещё 5 компаниям. Ваша технология становится отраслевым стандартом.',
+          deltas:[{t:'Доход × 6 лицензий',c:'dp'},{t:'Репутация +20',c:'dp'},{t:'Свобода действий',c:'dp'},{t:'+900 очков',c:'dp'}],
+          lesson:'Неэксклюзивная лицензия в долгосрочной перспективе выгоднее.',
+          next:'final'
+        }
+      },
+      {
+        name: '💰 Эксклюзивная лицензия — большой чек сейчас',
+        meta: 'Максимальный доход сейчас, потеря гибкости',
+        type: 'warn',
+        effect: s => ({ cash:s.cash+500, score:s.score+600 }),
+        result: {
+          icon:'💵', head:'Большой контракт подписан',
+          text:'Получили крупную сумму сразу. Но теперь технология заперта в одних руках. Если холдинг не продлит контракт — вы потеряете рынок.',
+          deltas:[{t:'+500 тыс ₽',c:'dp'},{t:'Ограничена независимость',c:'dw'},{t:'+600 очков',c:'dp'}],
+          lesson:'Эксклюзив — высокая цена сейчас, но риск зависимости потом.',
+          next:'final'
+        }
+      },
+      {
+        name: '🚫 Отказать — будем развивать и продавать сами',
+        meta: 'Полный контроль · сохраняем 100% маржи',
+        type: 'warn',
+        effect: s => ({ score:s.score+300, sales:s.sales+3 }),
+        result: {
+          icon:'💪',
+          _headFn: s => {
+            const royaltyLost = Math.round(s.sales * s.price * 0.08 * 12);
+            return `Отказали — и сохранили ${royaltyLost} тыс ₽/год`;
+          },
+          head: '',
+          _textFn: s => {
+            const monthlyRev = s.sales * s.price;
+            const royaltyRate = 0.08;
+            const royaltyLost = Math.round(monthlyRev * royaltyRate * 12);
+            const keepProfit = Math.round(monthlyRev - monthlyRev * s.costPct - s.opexFixed);
+            return `Вы отказались платить роялти 8% и сохранили полный контроль над технологией.\n\nЧто это значит в деньгах:\n• Текущая прибыль: ~${keepProfit} тыс ₽/мес\n• Если бы согласились на лицензию: платили бы ~${Math.round(monthlyRev * royaltyRate)} тыс ₽/мес роялти\n• Экономия: ~${royaltyLost} тыс ₽/год\n\nПридётся конкурировать с крупным холдингом — но технология ваша и вся прибыль ваша.`;
+          },
+          text: '',
+          deltas:[{t:'Полный контроль над технологией',c:'dp'},{t:'100% маржи — без роялти',c:'dp'},{t:'Продажи +3/мес',c:'dp'},{t:'+300 очков',c:'dp'}],
+          lesson:'Отказ от лицензии означает: вся прибыль ваша, но и весь риск ваш. Работает если уверены в своей команде.',
+          next:'final'
+        }
+      }
+    ]
+  },
+
+  // ────────────────────────────────────────────────
+  // ПЛОХОЙ ФИНАЛ (продали бизнес)
+  // ────────────────────────────────────────────────
+  'final_bad': {
+    pathPos: 7,
+    tag: 'Конец игры',
+    title: 'Бизнес продан',
+    body: 'Без патента у вас не было рычагов. Конкурент предложил символическую сумму — и вы были вынуждены согласиться.',
+    warn: 'Если бы технология была защищена патентом — цена продажи была бы в 5–10 раз выше. Интеллектуальная собственность — это актив, который создаёт стоимость.',
+    choices: [{
+      name: '🔄 Сыграть заново — теперь я знаю',
+      meta: '',
+      type: 'good',
+      effect: s => s,
+      result: { icon:'', head:'', text:'', deltas:[], lesson:'', next:'restart' }
+    }]
+  }
+};
+
+// ══ ПУТЬ ══
+const PATH_LABELS = ['Старт','Угроза','Кризис','Патент','Блок','Рост','Лидер'];
+
+function calcFin(s) {
+  const rev = s.sales * s.price;
+  const cogs = Math.round(rev * s.costPct);
+  const opex = s.opexFixed || 280; // фиксированные расходы цеха тыс ₽/мес
+  const profit = Math.round(rev - cogs - opex);
+  const profitPct = rev > 0 ? Math.round(profit / rev * 100) : 0;
+  return { rev, cogs, opex, profit, profitPct };
+}
+
+function renderHeader() {
+  const f = calcFin(st);
+  const revStr = f.rev >= 1000 ? (f.rev/1000).toFixed(1)+' млн' : f.rev+' тыс';
+  const cashColor = st.cash < 100 ? 'dn' : '';
+  const debtBadge = st.debt > 0 ? `<span class="debt-badge">Долг: ${st.debt} тыс ₽</span>` : '';
+  const monthsBadge = st.totalMonths > 0 ? `<span class="months-badge">${st.totalMonths} мес.</span>` : '';
+  return `<div class="header">
+    <div class="header-top">
+      <span class="co-name">🏭 ${st.productName || 'ТехКомпания'}</span>
+      <span style="font-size:12px;color:var(--txt3)">Чек: ${st.price} тыс ₽ ${monthsBadge}${debtBadge}</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-val ${cashColor}">${st.cash} тыс</div><div class="kpi-lbl">Свободные деньги</div></div>
+      <div class="kpi"><div class="kpi-val">${st.sales}</div><div class="kpi-lbl">Продаж/мес</div></div>
+      <div class="kpi"><div class="kpi-val ${f.profit < 0 ? 'dn' : 'up'}">${f.profit > 0 ? '+' : ''}${f.profit} тыс</div><div class="kpi-lbl">Прибыль/мес</div></div>
+      <div class="kpi"><div class="kpi-val ${st.reputation<70?'dn':'up'}">${st.reputation}</div><div class="kpi-lbl">Репутация</div></div>
+    </div>
+  </div>`;
+}
+
+function renderPath(pos) {
+  let html = '<div class="path-wrap"><div class="path-title">Ваш путь</div><div class="path-bar">';
+  PATH_LABELS.forEach((lbl, i) => {
+    const done = i < pos, active = i === pos;
+    html += `<div class="ps">
+      <div class="pd ${done?'done':''} ${active?'active':''}">${done?'✓':(i+1)}</div>
+      <div class="pl ${active?'active':''}">${lbl}</div>
+    </div>`;
+    if(i < PATH_LABELS.length-1) html += `<div class="pline ${done?'done':''}"></div>`;
+  });
+  return html + '</div></div>';
+}
+
+function renderHistory() {
+  if(history.length === 0) return '';
+  const items = history.slice(-4).reverse().map(h => {
+    const stage = STAGES[h.stageId];
+    if(!stage) return '';
+    return `<div class="h-item"><div class="h-dot g"></div><span>${stage.tag}: ${stage.title}</span></div>`;
+  }).join('');
+  return `<div class="history"><div class="history-title">История решений</div>${items}</div>`;
+}
+
+function initCollapsible() {
+  // На мобильных: схлопываем длинные тексты card-body
+  if(window.innerWidth > 540) return;
+  document.querySelectorAll('.card-body').forEach(el => {
+    if(el.scrollHeight > 100 && !el.dataset.collapsible) {
+      el.dataset.collapsible = '1';
+      el.classList.add('collapsible-text','collapsed');
+      const btn = document.createElement('button');
+      btn.className = 'show-more-btn';
+      btn.textContent = '▾ Показать полностью';
+      btn.onclick = () => {
+        el.classList.toggle('collapsed');
+        btn.textContent = el.classList.contains('collapsed') ? '▾ Показать полностью' : '▴ Свернуть';
+      };
+      el.parentNode.insertBefore(btn, el.nextSibling);
+    }
+  });
+}
+
+function renderStage(stageId) {
+  const stage = STAGES[stageId];
+  if(!stage) { goFinal(); return; }
+
+  // Пропустить этап если условие выполнено
+  if(stage._skipIfFn && stage._skipIfFn(st)) {
+    renderStage(stage._skipNext || 4);
+    return;
+  }
+
+  answered = false;
+
+  const choicesHTML = stage.choices.map((c, i) => `
+    <button class="choice" id="ch${i}" onclick="choose('${stageId}',${i})">
+      <div class="cn">${c.name}</div>
+      ${c.meta ? `<div class="cm">${c.meta}</div>` : ''}
+    </button>`).join('');
+
+  const warnText = stage._warnFn ? stage._warnFn(st) : stage.warn;
+  const warnHTML = warnText ? `<div class="warn-strip">⚠️ ${warnText}</div>` : '';
+  const infoHTML = stage.info ? `<div class="info-box">💡 ${stage.info}</div>` : '';
+  const backHTML = history.length > 0
+    ? `<button class="btn-back" onclick="goBack()">← Вернуться назад и выбрать иначе</button>`
+    : '';
+
+  document.getElementById('root').innerHTML = `
+    ${renderHeader()}
+    ${renderPath(stage.pathPos || 0)}
+    ${backHTML}
+    <div class="card">
+      <div class="card-tag">${stage.tag}</div>
+      <div class="card-title">${stage.title}</div>
+      <div class="card-body">${stage._bodyFn ? stage._bodyFn(st) : stage.body}${warnHTML}${infoHTML}</div>
+    </div>
+    <div class="choices">${choicesHTML}</div>
+    <div class="result" id="res"></div>
+    <button class="btn-next" id="btn-next" onclick="goNext()">Далее →</button>
+    ${renderHistory()}`;
+  window.scrollTo(0,0);
+  initCollapsible();
+}
+
+let _nextStageId = null;
+
+function choose(stageId, idx) {
+  if(answered) return;
+
+  const stage = STAGES[stageId];
+  const c = stage.choices[idx];
+
+  // Определяем стоимость выбора из эффекта
+  const testPatch = c.effect({...st});
+  const cashDiff = (testPatch.cash !== undefined) ? testPatch.cash - st.cash : 0;
+  const cost = cashDiff < 0 ? Math.abs(cashDiff) : 0;
+
+  // Если не хватает денег — показываем модал вместо покупки
+  if(cost > 0 && st.cash < cost) {
+    checkFunds(cost, () => { _executeChoice(stageId, idx); });
+    return;
+  }
+
+  _executeChoice(stageId, idx);
+}
+
+function _executeChoice(stageId, idx) {
+  if(answered) return;
+  answered = true;
+  const stage = STAGES[stageId];
+  const c = stage.choices[idx];
+  const effectiveType = c._typeFn ? c._typeFn(st) : c.type;
+
+  // Сохраняем в историю ДО применения эффекта
+  history.push({ stageId, state: {...st} });
+
+  // Применяем эффект
+  const patch = c.effect({...st});
+  Object.assign(st, patch);
+  // НЕ ограничиваем cash снизу — долг возможен
+  st.sales = Math.max(0, st.sales);
+  st.reputation = Math.max(0, Math.min(110, st.reputation));
+  st.profitPct = Math.max(0.05, Math.min(0.40, st.profitPct));
+
+  // Визуал
+  document.querySelectorAll('.choice').forEach((btn, i) => {
+    btn.disabled = true;
+    if(i === idx) btn.classList.add('s' + effectiveType[0]);
+  });
+  const r = c.result;
+  const dl = (r._deltasFn ? r._deltasFn(st) : (r.deltas||[])).map(d=>`<span class="delta ${d.c}">${d.t}</span>`).join('');
+  const rHead = r._headFn ? r._headFn(st) : r.head;
+  const rText = (r._textFn ? r._textFn(st) : r.text).replace(/\n/g,'<br>');
+  const rLesson = r._lessonFn ? r._lessonFn(st) : r.lesson;
+  const rNext = r._nextFn ? r._nextFn(st) : r.next;
+  const res = document.getElementById('res');
+  res.className = 'result ' + effectiveType + ' show';
+
+  // Добавляем уведомление о долге если cash < 0
+  const debtWarning = st.cash < 0
+    ? `<div style="background:var(--r-bg);border:1px solid var(--r-brd);border-radius:9px;padding:8px 12px;margin-top:8px;font-size:12px;color:var(--r-txt);">⚠️ Счёт ушёл в минус (${st.cash} тыс ₽). Нужно пополнить — кредит, кубышка или другие решения.</div>`
+    : '';
+
+  res.innerHTML = `
+    <div class="ri">${r.icon}</div>
+    <div class="rh">${rHead}</div>
+    <div class="rt">${rText}</div>
+    ${dl ? `<div class="deltas">${dl}</div>` : ''}
+    ${debtWarning}
+    ${rLesson ? `<div class="rl">📚 ${rLesson}</div>` : ''}`;
+
+  _nextStageId = rNext;
+  const btn = document.getElementById('btn-next');
+  btn.className = 'btn-next show';
+  btn.textContent = r.next === 'final' || r.next === 'final_bad' ? 'Посмотреть итоги →'
+    : r.next === 'restart' ? 'Играть заново' : 'Далее →';
+
+  // Обновить шапку надёжно
+  const root = document.getElementById('root');
+  if(root) {
+    const hdr = root.querySelector('.header');
+    if(hdr) {
+      hdr.insertAdjacentHTML('afterend', renderHeader());
+      hdr.remove();
+    }
+  }
+}
+
+function goNext() {
+  if(_nextStageId === 'restart') { restartGame(); return; }
+  if(_nextStageId === 'final' || !STAGES[_nextStageId]) { goFinal(); return; }
+
+  // Начислить прибыль за время прохождения текущего этапа
+  const months = STAGE_MONTHS[_nextStageId] || 0;
+  if(months > 0) {
+    const earned = accrueProfit(months);
+    if(Math.abs(earned) >= 50) {
+      const sign = earned >= 0 ? '+' : '';
+      const lossNote = st._competitorLoss > 0 ? ` (конкурент увёл ${st._competitorLoss} кл.)` : '';
+      st._competitorLoss = 0;
+      const note = document.getElementById('profit-note');
+      if(note) {
+        note.textContent = `⏳ Прошло ${months} мес. Компания заработала: ${sign}${earned} тыс ₽ (прибыль поступила на счёт)${lossNote}`;
+        note.style.display = 'block';
+        setTimeout(()=>{ note.style.display='none'; }, 4000);
+      }
+    }
+  }
+
+  // Патент получен — конкурент больше не уводит клиентов
+  if(_nextStageId === 5 || _nextStageId === '5') {
+    st.patentReceived = true;
+  }
+  // Показываем 3_secret_warning только один раз
+  if(_nextStageId === '3_secret_warning') {
+    st._secretWarningShown = true;
+  }
+  // Иск с узким патентом — перенаправить
+  if(_nextStageId === '5_clients_from_competitor' && st._narrowPatent) {
+    renderStage('5_lawsuit_narrow');
+    return;
+  }
+
+  // Уведомление о потере продаж из-за репутации
+  if(st._repLoss > 0) {
+    const note = document.getElementById('profit-note');
+    if(note) {
+      note.textContent = `📉 Репутация ${st.reputation} — потеряно ${st._repLoss} клиентов из-за отзывов`;
+      note.style.display = 'block';
+      setTimeout(()=>{ note.style.display='none'; }, 4000);
+    }
+    st._repLoss = 0;
+  }
+
+  renderStage(_nextStageId);
+}
+
+function goBack() {
+  if(history.length === 0) return;
+  const prev = history.pop();
+  st = {...prev.state};
+  _nextStageId = null;
+  answered = false;
+  renderStage(prev.stageId);
+}
+
+function getRating(score) {
+  const sc = score !== undefined ? score : st.score;
+  if(sc >= 4500) return {title:'Технологический лидер рынка', emoji:'🏆', color:'var(--g-txt)'};
+  if(sc >= 3000) return {title:'Основатель технологической империи', emoji:'🎖', color:'var(--b-txt)'};
+  if(sc >= 1800) return {title:'Директор по интеллектуальной собственности', emoji:'⚙️', color:'var(--w-txt)'};
+  if(sc >= 800)  return {title:'Главный инженер-изобретатель', emoji:'🔧', color:'var(--txt2)'};
+  return {title:'Руководитель на старте', emoji:'🌱', color:'var(--txt3)'};
+}
+
+function goFinal() {
+  // Начисляем финальную прибыль за последний период
+  accrueProfit(2);
+  // Погашаем долг из кассы
+  if(st.debt > 0) st.cash -= st.debt;
+  const finalScore = st.score + Math.max(0, st.cash) - st.debt;
+  const r = getRating(finalScore);
+  const f = calcFin(st);
+  const inDebt = st.cash < 0;
+  const debtBlock = st.debt > 0 ? `
+    <div style="background:var(--r-bg);border:1px solid var(--r-brd);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;color:var(--r-txt);line-height:1.7;">
+      <b>Долг погашен: −${st.debt} тыс ₽</b><br>
+      ${inDebt ? `После погашения долга касса ушла в минус: ${st.cash} тыс ₽. Пришлось сокращать команду.` : `Остаток после погашения: ${st.cash} тыс ₽.`}
+    </div>` : '';
+  const fireBlock = st.staff < 4 ? `
+    <div style="background:var(--w-bg);border:1px solid var(--w-brd);border-radius:10px;padding:10px 14px;margin:8px 0;font-size:13px;color:var(--w-txt);">
+      ⚠️ Уволено ${4 - st.staff} сотрудников в ходе игры. Продажи снизились.
+    </div>` : '';
+  const kubBlock = st._kubushkaUsed ? `
+    <div style="background:var(--w-bg);border:1px solid var(--w-brd);border-radius:10px;padding:10px 14px;margin:8px 0;font-size:13px;color:var(--w-txt);">
+      🏺 Использовали личную кубышку: −200 тыс ₽ личных средств.
+    </div>` : '';
+
+  document.getElementById('root').innerHTML = `
+    <div class="final-card">
+      <div style="font-size:40px;margin-bottom:8px">${r.emoji}</div>
+      <div style="font-size:12px;color:var(--txt3);margin-bottom:4px">Итог игры · ${st.totalMonths} месяцев</div>
+      <div class="fscore">${Math.max(0,finalScore).toLocaleString()}</div>
+      <div class="frating" style="color:${r.color}">${r.title}</div>
+      <div style="font-size:13px;color:var(--txt2);margin:10px 0">Правильных решений: <b>${st.goodChoices}</b> · Репутация: <b>${st.reputation}</b></div>
+      ${debtBlock}${fireBlock}${kubBlock}
+      <div class="fgrid">
+        <div class="fkpi"><div class="fv">${st.sales}/мес</div><div class="fl">Продажи</div></div>
+        <div class="fkpi"><div class="fv">${st.price} тыс</div><div class="fl">Средний чек</div></div>
+        <div class="fkpi"><div class="fv">${Math.round(f.profit)} тыс</div><div class="fl">Прибыль/мес</div></div>
+        <div class="fkpi"><div class="fv ${inDebt?'bad':''}">${st.cash} тыс</div><div class="fl">Остаток</div></div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:14px;color:var(--txt2);line-height:1.75">
+        ${r.title === 'Технологический лидер рынка'
+          ? '🎉 Вы защитили технологию, заблокировали конкурента и вывели компанию на новый уровень. Патентный портфель — ваш главный актив.'
+          : inDebt
+          ? '💸 Игра закончилась с долгами. Промедление с патентованием и неверные решения обошлись дорого. Попробуйте снова!'
+          : 'Защита интеллектуальной собственности — не расходы, а инвестиции в стоимость компании. Попробуйте пройти ещё раз!'}
+      </div>
+      <button class="btn-big" onclick="restartGame()">Сыграть заново</button>
+      <button class="btn-back" style="margin-top:8px" onclick="goBack()">← Вернуться и изменить последнее решение</button>
+    </div>
+
+    <div class="card" style="margin-top:0">
+      <div class="card-tag">Итоги обучения</div>
+      <div class="card-title" style="font-size:15px">Что вы узнали в этой игре</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.85;">
+        ${getLessons()}
+      </div>
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+function getLessons() {
+  const MAX_SCORE = 5800; // максимально возможный счёт при оптимальном прохождении
+  const totalDecisions = history.length;
+  const goodPct = totalDecisions > 0 ? Math.round(st.goodChoices / totalDecisions * 100) : 0;
+  const badDecisions = totalDecisions - st.goodChoices;
+
+  // ── Ключевые решения ──
+  const keyDecisions = [];
+
+  if(st._secretDone) {
+    keyDecisions.push({ok:true,  text:'✅ Оформили NDA и документы о передаче прав — технологии защищены от ухода сотрудников'});
+  } else {
+    keyDecisions.push({ok:false, text:'❌ Не оформили NDA — технолог смог уйти к конкуренту с вашими ноу-хау'});
+  }
+
+  if(st._usedIIP) {
+    keyDecisions.push({ok:true,  text:'✅ Выбрали ИИП: патент за 6 месяцев, широкие притязания, без брифа'});
+  } else if(st._usedPatentomaniya) {
+    keyDecisions.push({ok:null,  text:'⚠️ Выбрали Патентоманию: патент получен, но 14 месяцев вместо 6 — конкурент продавал лишние 8 мес'});
+  } else if(st.patentType === 'utility_model') {
+    keyDecisions.push({ok:false, text:'❌ Выбрали Империю патентов: получили полезную модель вместо изобретения — слабая защита'});
+  }
+
+  if(st._tmRegistered) {
+    keyDecisions.push({ok:true,  text:'✅ Зарегистрировали товарный знак — название продукта защищено'});
+  } else {
+    keyDecisions.push({ok:false, text:'❌ Не зарегистрировали товарный знак — конкурент мог использовать похожее название'});
+  }
+
+  if(st.patentReceived) {
+    keyDecisions.push({ok:true,  text:'✅ Получили патент и остановили конкурента'});
+  } else {
+    keyDecisions.push({ok:false, text:'❌ Патент не получен — конкурент продолжает работать'});
+  }
+
+  if(st.debt > 0) {
+    keyDecisions.push({ok:false, text:`❌ Взяли кредит — долг ${st.debt} тыс ₽. Ошибки обошлись дороже правильного пути`});
+  }
+  if(st._kubushkaUsed) {
+    keyDecisions.push({ok:null,  text:'⚠️ Использовали личную кубышку — пришлось вложить личные средства из-за нехватки бюджета'});
+  }
+
+  // ── Как улучшить результат ──
+  const improvements = [];
+  if(!st._secretDone) improvements.push('Оформить NDA сразу при найме сотрудников — это 120 тыс ₽ и 1 день, а не годы судебных тяжб');
+  if(!st._usedIIP && !st._usedPatentomaniya) improvements.push('Выбрать ИИП для патентования: эксперт с техническим образованием, без брифа, патент за 6 мес');
+  if(st._usedPatentomaniya) improvements.push('Каждый лишний месяц ожидания патента = упущенная прибыль. ИИП сделал бы за 6 мес вместо 14');
+  if(!st._tmRegistered) improvements.push('Сразу после патента регистрировать товарный знак — 60 тыс ₽, вы получите защиту бренда от копирования на 100%');
+  if(st.debt > 0) improvements.push('Правильная последовательность решений позволяет пройти игру без кредита');
+
+  const scoreColor = st.score >= MAX_SCORE * 0.8 ? '#3B8F3B' : st.score >= MAX_SCORE * 0.5 ? '#8F7A00' : '#8F3B3B';
+
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:${scoreColor}">${st.score}</div>
+        <div style="font-size:10px;color:var(--txt3)">из ${MAX_SCORE} возможных</div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:3px">Очков набрано</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#3B8F3B">${st.goodChoices}</div>
+        <div style="font-size:10px;color:var(--txt3)">из ${totalDecisions} · ${goodPct}% точность</div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:3px">Верных решений</div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Финансовый результат</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:${st.cash > 0 ? 'var(--g-txt)' : 'var(--r-txt)'}">${st.cash} тыс ₽</div>
+          <div style="font-size:10px;color:var(--txt3)">в кассе</div>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:600">${Math.round(st.sales * st.price)} тыс ₽</div>
+          <div style="font-size:10px;color:var(--txt3)">выручка/мес</div>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:${st.debt > 0 ? 'var(--r-txt)' : 'var(--g-txt)'}">${st.debt > 0 ? '−'+st.debt+' тыс ₽' : 'Без долгов'}</div>
+          <div style="font-size:10px;color:var(--txt3)">долг</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Ключевые решения</div>
+    ${keyDecisions.map(d => `<div style="padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px;color:var(--txt2)">${d.text}</div>`).join('')}
+
+    ${improvements.length > 0 ? `
+    <div style="font-size:12px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-top:14px;margin-bottom:8px;">Как улучшить результат</div>
+    ${improvements.map(i => `<div style="padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px;color:var(--txt2)">💡 ${i}</div>`).join('')}
+    ` : '<div style="padding:10px 0;font-size:13px;color:#3B8F3B">🎉 Отличный результат! Вы приняли все ключевые решения правильно.</div>'}
+
+    <div style="padding-top:12px;font-size:12px;color:var(--txt3);line-height:1.7;">
+      Институт Инноваций и Права — защищаем технологии под ключ: <b style="color:var(--txt)">iip.ru</b>
+    </div>
+
+    <div style="margin-top:16px;background:var(--bg3);border-radius:12px;padding:16px 18px;">
+      <div style="font-size:12px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Главные уроки игры</div>
+
+      <div style="font-size:13px;color:var(--txt2);line-height:1.85;">
+        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--brd);">
+          <b style="color:var(--txt)">📜 Зачем нужен патент?</b><br>
+          В игре конкурент скопировал ваш продукт и начал продавать на 6% дешевле. Без патента вы не могли его остановить юридически — только снижать цену, тратить деньги на рекламу или улучшать продукт. Конкурент снова копировал. Патент даёт исключительное право на технологию: можно подать в суд, потребовать компенсацию и запретить продажи. В игре это 980 тыс ₽ компенсации и уход конкурента с рынка.
+        </div>
+
+        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--brd);">
+          <b style="color:var(--txt)">⚖️ Почему важны широкие притязания?</b><br>
+          Если патент составлял специалист без технического образования (по брифу) — формулировки получались узкими. Конкурент менял 1–2 детали и обходил патент. Суд проигрывался. Эксперт с техническим образованием охватывает технологию шире — конкурент не находит лазейку, суд выигрывается.
+        </div>
+
+        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--brd);">
+          <b style="color:var(--txt)">™️ Зачем товарный знак?</b><br>
+          Конкурент мог зарегистрировать похожее название и выпускать продукт под ним. Клиенты путались. Товарный знак закрепляет название за вами — любое использование без разрешения является нарушением. Стоит 60 тыс ₽, защищает бессрочно.
+        </div>
+
+        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--brd);">
+          <b style="color:var(--txt)">🔒 Зачем NDA и договоры о передаче прав?</b><br>
+          В игре главный технолог мог уйти к конкуренту и унести все ноу-хау: формулу, базу клиентов, производственные секреты. Без подписанных документов — доказать нарушение в суде невозможно. NDA и договор о передаче прав на служебные разработки оформляются при найме — это защита знаний, которые не входят в патент.
+        </div>
+
+        <div>
+          <b style="color:var(--txt)">💡 Три инструмента закрывают разные риски:</b><br>
+          Патент защищает технологию · Товарный знак защищает бренд · NDA защищает знания людей.<br>
+          Работают только вместе — каждый закрывает то, что другие не могут.
+        </div>
+      </div>
+    </div>
+
+    <svg viewBox="0 0 300 90" width="100%" style="margin-top:16px;max-width:300px;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="10" width="85" height="70" rx="8" fill="var(--b-bg)" stroke="var(--b-brd)" stroke-width="1.5"/>
+      <text x="47" y="35" text-anchor="middle" font-size="16">📜</text>
+      <text x="47" y="52" text-anchor="middle" font-size="9" font-weight="600" fill="var(--b-txt)">Патент</text>
+      <text x="47" y="65" text-anchor="middle" font-size="8" fill="var(--txt3)">Технология</text>
+      <text x="47" y="75" text-anchor="middle" font-size="8" fill="var(--txt3)">20 лет</text>
+      <rect x="108" y="10" width="85" height="70" rx="8" fill="var(--g-bg)" stroke="var(--g-brd)" stroke-width="1.5"/>
+      <text x="150" y="35" text-anchor="middle" font-size="16">™️</text>
+      <text x="150" y="52" text-anchor="middle" font-size="9" font-weight="600" fill="var(--g-txt)">Товарный знак</text>
+      <text x="150" y="65" text-anchor="middle" font-size="8" fill="var(--txt3)">Бренд</text>
+      <text x="150" y="75" text-anchor="middle" font-size="8" fill="var(--txt3)">10 лет +∞</text>
+      <rect x="211" y="10" width="85" height="70" rx="8" fill="var(--w-bg)" stroke="var(--w-brd)" stroke-width="1.5"/>
+      <text x="253" y="35" text-anchor="middle" font-size="16">🔒</text>
+      <text x="253" y="52" text-anchor="middle" font-size="9" font-weight="600" fill="var(--w-txt)">NDA</text>
+      <text x="253" y="65" text-anchor="middle" font-size="8" fill="var(--txt3)">Знания людей</text>
+      <text x="253" y="75" text-anchor="middle" font-size="8" fill="var(--txt3)">∞</text>
+    </svg>`;
+}
+
+function restartGame() {
+  st = {...INIT_STATE};
+  history = [];
+  answered = false;
+  _nextStageId = null;
+  _pendingCost = 0;
+  _pendingCallback = null;
+  _fundsLog = [];
+  selectedProduct = null;
+  renderStart();
+}
+
+const PRODUCTS_DATA = {
+  sensor: {
+    name: '⚙️ Датчик давления',
+    fullName: 'Датчик давления для промышленности',
+    emoji: '⚙️',
+    desc: 'Производите специализированные датчики давления для заводов и пищевых производств. Уникальная конструкция — точнее аналогов, выдерживает агрессивные среды.',
+    price: 90, sales: 12, cash: 500, opexFixed: 600, costPct: 0.35,
+    competitorText: 'Завод в соседнем регионе начал выпускать датчики с похожей конструкцией и продаёт на 6% дешевле вашего. Не все клиенты впечатлились — качество у них пока непонятное. Но те, кто закупает партиями, уже запросили у них коммерческое предложение.',
+  },
+  coating: {
+    name: '🧪 Антикоррозийное покрытие',
+    fullName: 'Антикоррозийное покрытие для металлоконструкций',
+    emoji: '🧪',
+    desc: 'Производите уникальный антикоррозийный состав для металлоконструкций. Собственная формула — держится вдвое дольше стандартных аналогов в суровых условиях.',
+    price: 70, sales: 12, cash: 500, opexFixed: 480, costPct: 0.32,
+    competitorText: 'Химическое предприятие выпустило покрытие с очень похожими характеристиками — судя по описанию, скопировали вашу формулу. Продают на 6% дешевле. Не все клиенты отреагировали, но те, кто закупает большими партиями, уже запросили у них коммерческое предложение.',
+  }
+};
+
+let selectedProduct = null;
+
+function selectProduct(key) {
+  const p = PRODUCTS_DATA[key];
+  selectedProduct = key;
+  const f = {
+    rev: p.sales * p.price,
+    cogs: Math.round(p.sales * p.price * p.costPct),
+    profit: Math.round(p.sales * p.price - p.sales * p.price * p.costPct - p.opexFixed)
+  };
+  st.price = p.price;
+  st.sales = p.sales;
+  st.baseSales = p.sales;
+  st.cash = p.cash;
+  st.opexFixed = p.opexFixed;
+  st.costPct = p.costPct;
+  st.profitPct = 0.18;
+  st.patentType = 'invention';
+  st.patentReceived = false;
+  st._competitorLoss = 0;
+  st._equipmentDone = false;
+  st._secretWarningShown = false;
+  st.debt = 0;
+  st.debtMonthly = 0;
+  st.totalMonths = 0;
+  st.staff = 4;
+  st._kubushkaUsed = false;
+  st.productName = p.emoji + ' ' + p.fullName;
+  st.productKey = key;
+
+  STAGES[1].body = p.competitorText;
+  STAGES[1].info = `Сейчас: ${p.sales} продаж/мес × ${p.price} тыс ₽ = ${f.rev} тыс ₽ выручки/мес. Себестоимость ${Math.round(p.costPct*100)}% = ${f.cogs} тыс ₽. Расходы цеха (аренда, зарплаты) = ${p.opexFixed} тыс ₽/мес. Операционная прибыль = ~${f.profit} тыс ₽/мес. Запас: 500 тыс ₽.`;
+
+  renderStage(1);
+}
+
+function renderStart() {
+  document.getElementById('root').innerHTML = `
+    <div class="card" style="padding:26px 20px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <svg viewBox="0 0 320 105" width="100%" style="max-width:340px;margin:0 auto 14px;display:block;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="320" height="105" rx="10" fill="#EEF4FB"/>
+          <rect x="60" y="15" width="12" height="40" rx="3" fill="#607D8B"/>
+          <rect x="80" y="8" width="12" height="47" rx="3" fill="#607D8B"/>
+          <rect x="100" y="12" width="12" height="43" rx="3" fill="#607D8B"/>
+          <circle cx="66" cy="12" r="6" fill="#CFD8DC" opacity="0.7"/>
+          <circle cx="61" cy="6" r="4" fill="#CFD8DC" opacity="0.5"/>
+          <circle cx="86" cy="5" r="6" fill="#CFD8DC" opacity="0.7"/>
+          <circle cx="80" cy="-1" r="4" fill="#CFD8DC" opacity="0.5"/>
+          <rect x="40" y="52" width="160" height="44" rx="3" fill="#1565C0"/>
+          <polygon points="36,52 120,30 204,52" fill="#0D47A1"/>
+          <rect x="52" y="62" width="18" height="14" rx="2" fill="#90CAF9"/>
+          <rect x="78" y="62" width="18" height="14" rx="2" fill="#90CAF9"/>
+          <rect x="104" y="62" width="18" height="14" rx="2" fill="#90CAF9"/>
+          <rect x="130" y="62" width="18" height="14" rx="2" fill="#90CAF9"/>
+          <rect x="162" y="72" width="28" height="24" rx="2" fill="#0A3880"/>
+          <rect x="0" y="95" width="320" height="10" rx="5" fill="#B0BEC5"/>
+        </svg>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.75;">
+          Вы открыли небольшое производство с цехом и делаете уникальный продукт.
+          Всё шло хорошо — пока не появился конкурент, который вас копирует.<br><br>
+          <b>Выберите, что вы производите:</b>
+        </div>
+      </div>
+      ${Object.entries(PRODUCTS_DATA).map(([key, p]) => {
+        const rev = p.sales * p.price;
+        const profit = Math.round(rev - rev*p.costPct - p.opexFixed);
+        return `<div onclick="selectProduct('${key}')" style="background:var(--bg3);border:1.5px solid var(--brd);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--brd2)'" onmouseout="this.style.borderColor='var(--brd)'">
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px;">${p.name}</div>
+          <div style="font-size:13px;color:var(--txt2);margin-bottom:10px;line-height:1.6">${p.desc}</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+            <div style="background:var(--bg2);border-radius:8px;padding:7px 9px;text-align:center;">
+              <div style="font-size:14px;font-weight:600">${p.price} тыс</div>
+              <div style="font-size:10px;color:var(--txt3)">чек</div>
+            </div>
+            <div style="background:var(--bg2);border-radius:8px;padding:7px 9px;text-align:center;">
+              <div style="font-size:14px;font-weight:600">${p.sales}/мес</div>
+              <div style="font-size:10px;color:var(--txt3)">продаж</div>
+            </div>
+            <div style="background:var(--bg2);border-radius:8px;padding:7px 9px;text-align:center;">
+              <div style="font-size:14px;font-weight:600">${rev} тыс</div>
+              <div style="font-size:10px;color:var(--txt3)">выручка/мес</div>
+            </div>
+            <div style="background:var(--bg2);border-radius:8px;padding:7px 9px;text-align:center;">
+              <div style="font-size:14px;font-weight:600;color:var(--g-txt)">+${profit} тыс</div>
+              <div style="font-size:10px;color:var(--txt3)">прибыль/мес</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+renderStart();
+</script>
+</body>
+</html>
